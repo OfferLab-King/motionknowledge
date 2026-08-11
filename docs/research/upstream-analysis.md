@@ -144,7 +144,91 @@ Sources: [repository](https://github.com/Agents365-ai/video-podcast-maker), [v5.
 - **Avoid:** Character/shot abstractions that would distort an educational scene model.
 - **Recommendation:** Independently implement the useful review-state patterns around claims and scenes.
 
-## 10. Technology Conclusions
+## 10. Video Explainer System
+
+- **Repository:** https://github.com/prajwal-y/video_explainer
+- **Purpose:** The closest public codebase found for turning technical documents, Markdown, and URLs into narrated programmatic explainer videos.
+- **Current release/activity:** Created 2025-12-28; last source push 2026-02-24; about 217 stars, 70 forks, and 150 commits when inspected on 2026-08-12. It has no tagged release and has not received source commits for roughly five and a half months.
+- **Architecture:** Python pipeline for ingestion, understanding, planning, script, narration, TTS, storyboard, fact checking, scene generation, refinement, sound, sync, and shorts, paired with a TypeScript/React Remotion project. It reports 1,192 Python tests and 203 JavaScript tests. TTS precedes storyboard generation so the storyboard can use real word timings.
+- **Useful concepts:** Separate source understanding from scripting; use audio-derived timing; keep a storyboard schema; support resumable stage execution; fact-check against supplied sources; run iterative visual inspection and feedback; keep project outputs self-contained.
+- **License:** No root license file or declared GitHub license was present at inspection time.
+- **Commercial-use implications:** No code, prompts, tests, schemas, components, or documentation may be copied into MotionKnowledge without the copyright holder granting a commercial license. Publicly observable workflow facts may inform a clean-room implementation.
+- **Dependencies:** Python 3.10+, Node 20+, Remotion, FFmpeg, Claude/OpenAI adapters, ElevenLabs, Edge TTS, Whisper, and MusicGen-related tooling.
+- **Reuse:** None unless a suitable license is added and reviewed.
+- **Learn only:** Pipeline ordering, stage restart ergonomics, real-audio timing, refinement passes, and source fact-checking.
+- **Avoid:** Its generated-React-scene approach, which conflicts with MotionKnowledge's schema-first reusable component principle; its Edge TTS path without a terms review; and any unlicensed implementation material.
+- **Recommendation:** Treat as the closest conceptual reference, but not as a dependency or code source. MotionKnowledge's typed visual registry, SaaS tenancy, provenance, cost ledger, and background-job architecture remain materially different.
+
+Source: [repository](https://github.com/prajwal-y/video_explainer).
+
+## 11. Remotion Prompt-to-Motion-Graphics SaaS Template
+
+- **Repository:** https://github.com/remotion-dev/template-prompt-to-motion-graphics-saas
+- **Purpose:** Official Remotion template for a prompt-driven motion-graphics web application with live preview and optional cloud rendering.
+- **Current release/activity:** Created 2025-12-17 and last pushed 2026-08-04. Its dependencies include Next.js 16.2.11, React 19.2.1, AI SDK 5, Remotion, Lambda, Player, web renderer, Monaco, Babel, Three.js, and Zod.
+- **Architecture:** `prompt -> validation -> skill detection -> code generation -> sanitization -> in-browser compilation -> live Player preview`, with API routes for generation and Lambda render/progress. Skills inject only relevant chart, typography, sequencing, transition, social, spring, and 3D guidance.
+- **Useful concepts:** Cheap prompt classification before expensive calls; contextual skill selection; streaming generation UX; automatic compile-error correction; render-progress polling; and version-matched Next.js/Remotion integration.
+- **License:** No separate license file was present. The README points users to the special Remotion license.
+- **Commercial-use implications:** Treat all template use as governed by Remotion's current terms unless Remotion confirms otherwise. A MotionKnowledge production deployment falls under the automation application category.
+- **Dependencies:** Next.js 16.2.11, React 19.2.1, TypeScript 5.9, Zod 4.4, AI SDK 5, OpenAI adapter, Babel standalone, Monaco, and multiple Remotion packages.
+- **Reuse:** Supported integration patterns may be followed within the Remotion license. Exact template code reuse requires confirming its terms.
+- **Learn only:** Validation, skill routing, live preview, error correction, and Lambda progress patterns.
+- **Avoid:** Generating and compiling an entire React composition for every project. That architecture is appropriate for open-ended motion experiments but conflicts with MotionKnowledge's deterministic catalog and security model.
+- **Recommendation:** Use as the freshest official SaaS integration reference, not as the product foundation.
+
+Source: [repository](https://github.com/remotion-dev/template-prompt-to-motion-graphics-saas).
+
+## 12. IBM chuk-motion
+
+- **Repository:** https://github.com/IBM/chuk-motion
+- **Purpose:** Design-system-first Remotion MCP server exposing reusable video components and a track-based timeline to agents.
+- **Current release/activity:** v0.2.1 in its package metadata; created 2025-10-14 and last source push 2026-02-16. The repository was still maintained administratively in July 2026 but had modest adoption.
+- **Architecture:** Python MCP server and project manager generate Remotion projects from Pydantic-validated tools. The documented catalog contains 51 components covering charts, scenes, overlays, code, layouts, text animation, demo frames, content, and transitions, backed by centralized design tokens and safe margins.
+- **Useful concepts:** Agent-facing tools should map to bounded component schemas; design tokens should control all components; timelines can expose explicit tracks and gaps; preview fixtures can exercise the whole catalog.
+- **License:** Apache-2.0.
+- **Commercial-use implications:** Commercial reuse is possible with Apache notices and dependency review. Remotion's separate license still applies to rendered output and applications.
+- **Dependencies:** Python 3.11+, Pydantic, Jinja, virtual filesystem and MCP packages, generated Node/Remotion projects, plus repository tests and examples.
+- **Reuse:** Consider selected design-token and tool-schema ideas. Direct code adoption is unnecessary because MotionKnowledge is TypeScript-first and needs different domain schemas.
+- **Learn only:** Catalog breadth, MCP/tool ergonomics, safe-margin tokens, and component demonstration strategy.
+- **Avoid:** Introducing a Python control plane solely to match this project or exposing low-level component construction directly to end users.
+- **Recommendation:** Use as the strongest public component-library reference alongside HyperFrames' registry, while implementing MotionKnowledge's library independently in TypeScript.
+
+Source: [repository](https://github.com/IBM/chuk-motion).
+
+## 13. Remotion MCP App
+
+- **Repository:** https://github.com/mcp-use/remotion-mcp-app
+- **Purpose:** AI-authored Remotion compositions with an embedded live Player and in-place conversational editing.
+- **Current release/activity:** v1.0.0 package; created 2026-02-11 and last pushed 2026-08-06.
+- **Architecture:** A model-visible `create_video` tool compiles virtual React/Remotion files with esbuild and returns a bundle to an embedded Player. A mounted-view `update_video` tool merges changed files and swaps the preview without remounting a second artifact.
+- **Useful concepts:** Incremental preview updates, isolated per-session project state, a single initial tool plus contextual edit tool, and immediate compile diagnostics.
+- **License:** MIT, with Remotion separately licensed. The repository states that some rule tools were adapted from Remotion skills, whose standalone licensing remains unclear.
+- **Commercial-use implications:** Core MIT code is permissive, but adapted skill prose and Remotion use need separate review.
+- **Dependencies:** Node 22, MCP Use, esbuild, React 19, Remotion 4.0.505, Zod, PostHog, and shader UI packages.
+- **Reuse:** No direct dependency is required.
+- **Learn only:** Fast incremental preview and contextual edit-tool interaction.
+- **Avoid:** Accepting arbitrary user/model source code in the primary product renderer. MotionKnowledge edits validated scene specifications instead.
+- **Recommendation:** Apply its incremental-preview lesson at the scene-spec level, not by adopting arbitrary source compilation.
+
+Source: [repository](https://github.com/mcp-use/remotion-mcp-app).
+
+## 14. Coverage Verdict
+
+No single public repository satisfies MotionKnowledge's complete product shape. The most relevant references serve different layers:
+
+| Question | Strongest current reference | Finding |
+|---|---|---|
+| Most advanced deterministic renderer | HyperFrames | Deepest modern HTML/animation renderer, registry, linting, SDK, and cloud examples; Apache-2.0. |
+| Most mature primary timeline ecosystem | Remotion | Best React Player/composition/rendering ecosystem; special commercial automation license. |
+| Closest end-to-end explainer pipeline | `prajwal-y/video_explainer` | Broad document-to-explainer pipeline and tests, but stale since February 2026, not a SaaS, and unlicensed. |
+| Freshest official prompt-video SaaS pattern | Remotion prompt-to-motion-graphics template | Current Next.js 16.2 integration and streaming preview, but deliberately generates whole compositions. |
+| Strongest public reusable visual catalog | IBM chuk-motion | 51 documented components, typed tools, design tokens, and Apache-2.0 licensing. |
+| Broadest agentic production system | OpenMontage | Very large workflow surface, but AGPL-3.0 and much broader than educational explanation. |
+| Best live conversational preview pattern | Remotion MCP App | Incremental in-chat preview/edit loop, but based on arbitrary generated source. |
+
+The recommended MotionKnowledge design remains a synthesis rather than a fork: Remotion for the primary timeline, HyperFrames for sandboxed specialist output, a clean-room source-to-storyboard pipeline, and an independently implemented typed visual catalog informed by public patterns.
+
+## 15. Technology Conclusions
 
 ### Adopt
 
@@ -164,7 +248,7 @@ Sources: [repository](https://github.com/Agents365-ai/video-podcast-maker), [v5.
 - Current stable Drizzle version and migration/RLS behavior.
 - TTS voice/model pricing and commercial output rights.
 
-## 11. Clean-Room Rules
+## 16. Clean-Room Rules
 
 1. Record the repository, commit, license, and asset origin before copying any upstream material.
 2. Do not copy from ambiguous, missing-license, non-commercial, or AGPL sources into the proprietary product.
