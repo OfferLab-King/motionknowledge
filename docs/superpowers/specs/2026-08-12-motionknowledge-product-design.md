@@ -30,6 +30,7 @@ The complete first commercial release is a working SaaS product. Users can sign 
 8. **Provider independence.** Domain logic depends on provider interfaces, never vendor SDKs directly.
 9. **Measured economics.** Every paid operation and render records usage and estimated internal cost.
 10. **Human approval.** The product never auto-publishes and always exposes a review step.
+11. **Reuse before invention.** Before building infrastructure or a visual primitive, inspect current working upstream products and libraries. Adopt or adapt commercially compatible, maintained code when it is simpler and safer than an independent implementation.
 
 ## 3. Users and Initial Subject Fit
 
@@ -133,6 +134,19 @@ Packages expose narrow public entry points. Web UI, billing, and authentication 
 
 Dependency versions are pinned at installation time. Renovation is deliberate because rendering and schema behavior must remain reproducible.
 
+### 6.1 Build-versus-adopt gate
+
+Every substantial subsystem and visual component begins with a short build-versus-adopt check:
+
+1. search the already researched upstream repositories and current official ecosystem;
+2. confirm that the candidate is working, maintained, compatible with the selected versions, and materially reduces implementation effort;
+3. verify the repository license, file-level license, bundled assets, transitive dependencies, and commercial SaaS implications;
+4. prefer a supported public API, package, or isolated adapter over copying source;
+5. record the adopted version, origin, modifications, and required notice;
+6. build independently only when no suitable candidate exists, integration would be more complex, the dependency weakens core product control, or licensing/security is unsuitable.
+
+This rule applies especially to ingestion, job execution, storage, media inspection, captions, charts, animation primitives, editor controls, and provider SDK integrations. It does not justify adopting a large framework for a small need or importing a competing product wholesale. The typed scene grammar, evidence graph, routing policy, and product-specific user experience remain owned MotionKnowledge code.
+
 ## 7. Data Model
 
 Relational entities include users, workspaces, workspace memberships, projects, sources, source versions, research documents, claims, claim-source links, lesson plans, scripts, chapters, storyboards, scenes, scene versions, assets, asset links, audio assets, captions, generation jobs, render jobs, renders, usage events, subscriptions, and credit-ledger entries.
@@ -231,7 +245,11 @@ The reference project is both an onboarding example and the end-to-end acceptanc
 
 ## 16. Verification
 
-Unit tests cover schemas, state transitions, hashing, visual routing, asset provenance, cost calculation, timing, and caption grouping. Integration tests cover provider fakes, job execution, storage, render manifests, scene regeneration, and version promotion. Security tests cover cross-tenant access, signed URLs, URL ingestion, dangerous files, and hostile source instructions.
+Testing is risk-based and intentionally small. A test must protect a named product, financial, security, or rendering risk; tests are not added merely to increase coverage. Reused third-party libraries are tested at MotionKnowledge's integration boundary rather than having their upstream behavior re-tested.
+
+Focused unit tests cover versioned schema parsing, state transitions, stable hashing/idempotency, visual-routing decisions, asset provenance policy, cost calculation, actual-audio caption grouping, and other deterministic domain rules that could silently corrupt output. Focused integration tests cover provider-contract normalization, one representative job retry/idempotency path, storage authorization, render-manifest promotion, and changed-scene regeneration. Security tests cover cross-tenant access, signed downloads, SSRF controls, dangerous uploads, and hostile source instructions.
+
+Do not create broad snapshot suites, tests for static copy or styling, tests of framework/library behavior, one-test-per-component boilerplate, redundant provider permutations, or expensive multi-minute renders. Visual components use a small set of representative catalog fixtures and visual smoke checks instead of duplicative unit tests. New tests require either a reproduced defect, a high-risk invariant, or an acceptance criterion.
 
 A short deterministic composition is rendered in CI and inspected with ffprobe. The full DCF project is an end-to-end local acceptance test, not a routine CI render. Clean-install documentation is verified in a fresh environment.
 

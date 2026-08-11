@@ -251,8 +251,10 @@ The recommended MotionKnowledge design remains a synthesis rather than a fork: R
 ## 16. Clean-Room Rules
 
 1. Record the repository, commit, license, and asset origin before copying any upstream material.
-2. Do not copy from ambiguous, missing-license, non-commercial, or AGPL sources into the proprietary product.
-3. High-level facts, ideas, and workflows may inform independent code; expressive implementation, prompts, templates, and media may not.
-4. Keep third-party code changes isolated and auditable.
-5. Maintain `THIRD_PARTY_NOTICES.md` from the first dependency installation.
-6. Recheck licenses at every significant version upgrade.
+2. Search for a working, maintained, commercially compatible upstream implementation before building a substantial subsystem or visual primitive.
+3. Prefer a supported package or adapter over copied source; adopt only when integration is simpler than independent implementation.
+4. Do not copy from ambiguous, missing-license, non-commercial, or AGPL sources into the proprietary product.
+5. High-level facts, ideas, and workflows may inform independent code; expressive implementation, prompts, templates, and media may not.
+6. Keep third-party code changes isolated and auditable.
+7. Maintain `THIRD_PARTY_NOTICES.md` from the first dependency installation.
+8. Recheck licenses at every significant version upgrade.
