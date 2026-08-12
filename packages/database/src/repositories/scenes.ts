@@ -1,6 +1,6 @@
 import {and, eq} from 'drizzle-orm';
 import type {Database} from '../client';
-import {scenes, sceneVersions} from '../schema/index.js';
+import {scenes, sceneVersions} from '../schema/index';
 
 export interface SceneRepository {
   restoreVersion(input: {

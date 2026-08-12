@@ -11,7 +11,7 @@ import {
   renderManifestVersions,
   youtubeMetadataVersions,
   researchDocuments,
-} from '../schema/index.js';
+} from '../schema/index';
 
 export const ARTIFACT_TYPES = [
   'LESSON_PLAN',

@@ -1,6 +1,6 @@
 import {and, eq} from 'drizzle-orm';
 import type {Database} from '../client';
-import {projects} from '../schema/index.js';
+import {projects} from '../schema/index';
 import {transitionProjectStatus, type ProjectStatus} from '@motionknowledge/schemas';
 
 export interface ProjectRecord {

@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+
+:root {
+  --mk-background: #08111f;
+  --mk-surface: #10213a;
+  --mk-primary: #59d5e0;
+  --mk-accent: #f7c948;
+  --mk-text: #f8fafc;
+  --mk-muted: #9fb2c8;
+  --mk-danger: #fb7185;
+}
+
+body {
+  background: var(--mk-background);
+  color: var(--mk-text);
+  font-family: 'Inter', 'Helvetica Neue', system-ui, sans-serif;
+}

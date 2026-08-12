@@ -2,7 +2,7 @@ import {beforeAll, describe, expect, it} from 'vitest';
 import {createClient, type SupabaseClient} from '@supabase/supabase-js';
 import {eq, sql} from 'drizzle-orm';
 import {createDatabaseClient, type Database} from './client';
-import {projects, lessonPlanVersions, workspaces, workspaceMemberships} from './schema/index.js';
+import {projects, lessonPlanVersions, workspaces, workspaceMemberships} from './schema/index';
 import {ProjectRepositoryImpl} from './repositories/projects';
 import {ArtifactRepositoryImpl} from './repositories/artifacts';
 
