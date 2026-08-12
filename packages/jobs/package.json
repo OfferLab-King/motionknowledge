@@ -1,0 +1,27 @@
+{
+  "name": "@motionknowledge/jobs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "echo 'no lint configured'",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'no unit tests'",
+    "test:integration": "vitest run idempotency.integration.test.ts"
+  },
+  "dependencies": {
+    "@motionknowledge/database": "workspace:*",
+    "@motionknowledge/schemas": "workspace:*",
+    "drizzle-orm": "0.45.2",
+    "pg-boss": "12.27.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}
