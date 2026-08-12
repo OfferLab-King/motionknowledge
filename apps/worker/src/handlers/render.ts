@@ -12,7 +12,8 @@ import {mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {sha256Hex} from '@motionknowledge/assets';
-import {loadActiveSceneVersions, loadAudioForScenes, buildRenderManifest, groupSceneCaptions} from '../lib/manifest';
+import {loadActiveSceneVersions, loadAudioForScenes} from '../lib/manifest';
+import {buildRenderManifest} from '@motionknowledge/remotion-engine';
 
 export async function handleRenderFinal(
   input: {payload: z.infer<typeof PipelinePayloadSchema>; envelope: {idempotencyKey: string}; deps: WorkerDeps},
@@ -27,7 +28,7 @@ export async function handleRenderFinal(
   if (!manifestVersion) throw new Error('No active render manifest');
   const previewManifest = RenderManifestV1.parse(manifestVersion.payload);
 
-  const {loadActiveSceneVersions, loadAudioForScenes, buildRenderManifest} = await import('../lib/manifest');
+  const {loadActiveSceneVersions, loadAudioForScenes} = await import('../lib/manifest');
   const sceneVersions = await loadActiveSceneVersions(deps.db, payload.projectId);
   const audio = await loadAudioForScenes(deps.db, payload.projectId, sceneVersions.map((scene) => scene.id));
   const manifest = buildRenderManifest({

@@ -5,4 +5,4 @@ export * from './types';
 export * from './registry';
 export * from './fixtures';
 export * from './catalog.schema';
-export * from './components/index.js';
+export * from './components';

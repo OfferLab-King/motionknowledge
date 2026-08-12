@@ -25,7 +25,16 @@
     "postgres": "3.4.9",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "zod": "4.4.3"
+    "zod": "4.4.3",
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
+    "@motionknowledge/assets": "workspace:*",
+    "@motionknowledge/remotion-engine": "workspace:*",
+    "@motionknowledge/visual-library": "workspace:*",
+    "@remotion/player": "4.0.508",
+    "remotion": "4.0.508",
+    "@motionknowledge/storage": "workspace:*",
+    "pg-boss": "12.27.0"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",
@@ -34,6 +43,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "tailwindcss": "4.3.3",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "@motionknowledge/testkit": "workspace:*"
   }
 }

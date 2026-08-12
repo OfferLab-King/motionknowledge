@@ -50,15 +50,15 @@ export async function probeVideo(path: string): Promise<MediaProbe> {
 }
 
 export async function detectAudioLevels(path: string): Promise<{maxVolumeDb: number; meanVolumeDb: number}> {
-  const {stdout} = await execFileAsync('ffmpeg', [
-    '-v', 'error',
+  const {stderr} = await execFileAsync('ffmpeg', [
+    '-hide_banner',
     '-i', path,
     '-af', 'volumedetect',
     '-f', 'null',
     '-',
   ]);
-  const maxMatch = stdout.match(/max_volume: (-?[\d.]+) dB/);
-  const meanMatch = stdout.match(/mean_volume: (-?[\d.]+) dB/);
+  const maxMatch = stderr.match(/max_volume: (-?[\d.]+) dB/);
+  const meanMatch = stderr.match(/mean_volume: (-?[\d.]+) dB/);
   return {
     maxVolumeDb: maxMatch ? Number(maxMatch[1]) : -Infinity,
     meanVolumeDb: meanMatch ? Number(meanMatch[1]) : -Infinity,
