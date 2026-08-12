@@ -1,0 +1,27 @@
+{
+  "name": "@motionknowledge/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "echo 'no lint configured'",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'no unit tests'",
+    "test:integration": "vitest run rls.integration.test.ts"
+  },
+  "dependencies": {
+    "@motionknowledge/schemas": "workspace:*",
+    "drizzle-orm": "0.45.2",
+    "postgres": "3.4.9"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "2.112.3",
+    "@types/node": "24.10.1",
+    "drizzle-kit": "0.31.10",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}
