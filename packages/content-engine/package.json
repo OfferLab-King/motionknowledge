@@ -1,0 +1,28 @@
+{
+  "name": "@motionknowledge/content-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "echo 'no lint configured'",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:integration": "vitest run pipeline.integration.test.ts"
+  },
+  "dependencies": {
+    "@motionknowledge/providers": "workspace:*",
+    "@motionknowledge/schemas": "workspace:*",
+    "@motionknowledge/usage": "workspace:*",
+    "@motionknowledge/visual-library": "workspace:*",
+    "@motionknowledge/visual-router": "workspace:*",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}

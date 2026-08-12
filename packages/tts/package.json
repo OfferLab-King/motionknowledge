@@ -1,0 +1,27 @@
+{
+  "name": "@motionknowledge/tts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "echo 'no lint configured'",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@google-cloud/text-to-speech": "7.0.0",
+    "@motionknowledge/providers": "workspace:*",
+    "@motionknowledge/schemas": "workspace:*",
+    "@motionknowledge/storage": "workspace:*",
+    "elevenlabs": "1.59.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}

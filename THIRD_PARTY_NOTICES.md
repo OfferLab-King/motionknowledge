@@ -24,6 +24,14 @@ license obligations as required by the reuse-first policy (ADR 0005).
 | react / react-dom | 19.2.8 | MIT | UI runtime |
 | @types/react / @types/react-dom | 19.2.14 / 19.2.3 | MIT | type definitions |
 | remotion | 4.0.508 | Remotion License (source-available) | composition and rendering engine; see Render licensing below |
+| @remotion/bundler, @remotion/renderer, @remotion/studio, @remotion/player, @remotion/cli | 4.0.508 | Remotion License (source-available) | rendering toolchain |
+| openai | 7.4.0 | Apache-2.0 | LLM provider SDK |
+| zod-to-json-schema | 3.25.2 | MIT | structured-output schema conversion |
+| officeparser | 7.5.1 | MIT | PDF/DOCX/PPTX text extraction |
+| file-type | 22.0.1 | MIT | content sniffing |
+| ipaddr.js | 2.5.0 | MIT | IP classification for SSRF control |
+| @google-cloud/text-to-speech | 7.0.0 | Apache-2.0 | economical TTS provider |
+| elevenlabs | 1.59.0 | MIT | premium TTS provider |
 
 Notices for packages adopted in later tasks are appended as they are added.
 
