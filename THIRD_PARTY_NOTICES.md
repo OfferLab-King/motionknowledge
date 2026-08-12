@@ -21,6 +21,9 @@ license obligations as required by the reuse-first policy (ADR 0005).
 | @aws-sdk/s3-request-presigner | 3.1108.0 | Apache-2.0 | signed URLs |
 | pg-boss | 12.27.0 | MIT | Postgres-backed job queue |
 | @types/node | 24.10.1 | MIT | type definitions |
+| react / react-dom | 19.2.8 | MIT | UI runtime |
+| @types/react / @types/react-dom | 19.2.14 / 19.2.3 | MIT | type definitions |
+| remotion | 4.0.508 | Remotion License (source-available) | composition and rendering engine; see Render licensing below |
 
 Notices for packages adopted in later tasks are appended as they are added.
 
@@ -43,6 +46,17 @@ Notices for packages adopted in later tasks are appended as they are added.
 - **IBM chuk-motion** is not copied; only its public catalog structure was
   reviewed for registry design. Any IBM-contributed component source remains
   their copyright and is not included.
+
+## Reuse decisions recorded (ADR 0005)
+
+- **Visual components**: the deterministic visual library is independently
+  implemented MotionKnowledge code built on the Remotion public API. The
+  Remotion `shapes`/`effects` APIs and the public catalog structure of IBM
+  chuk-motion were reviewed for registry design; no IBM component source is
+  copied (see Prohibited reuse). HyperFrames registry metadata informed the
+  machine-readable catalog shape only.
+- **Drag and drop in the editor**: @dnd-kit (MIT) is adopted in the web
+  editor instead of custom drag infrastructure (recorded at adoption).
 
 ## Prohibited reuse
 
