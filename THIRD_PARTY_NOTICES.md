@@ -37,6 +37,11 @@ Notices for packages adopted in later tasks are appended as they are added.
   into this repository; Remotion is consumed as a published package.
 - **HyperFrames 0.7.107** is Apache-2.0 (HeyGen). Reuse preserves required
   notices and avoids HeyGen trademarks. See NOTICE in docker/hyperframes/.
+  The MotionKnowledge adapter does not copy HyperFrames source; it defines a
+  bounded `HyperFrameRequest` contract and runs specialist HTML/SVG scenes in
+  a sandboxed container built on chromium + FFmpeg (Apache-2.0/MIT toolchain,
+  Alpine packages). The npm package integrity for hyperframes@0.7.107 was
+  inspected at adoption: sha512-n42AOFT4j/DLhmg4pNODJ7Xw43/FHeSjtAPcN/Zz0pOzlj+ZKUf7eJAasluX3zCy46TJORJygSvu6XNh+2d7Zg==
 - **Video Podcast Maker** (Agents365-ai/video-podcast-maker, CC BY-NC 4.0)
   is NOT reused in any form. Only high-level workflow facts informed an
   independent implementation; no code, templates, prompts, or media are

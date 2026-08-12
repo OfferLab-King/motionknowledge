@@ -90,6 +90,7 @@ export const YouTubeMetadataV1 = z.object({
 });
 
 export type RenderManifest = z.infer<typeof RenderManifestV1>;
+export type RenderScene = z.infer<typeof RenderSceneV1>;
 export type RenderResult = z.infer<typeof RenderResultV1>;
 export type QAResult = z.infer<typeof QAResultV1>;
 export type YouTubeMetadata = z.infer<typeof YouTubeMetadataV1>;

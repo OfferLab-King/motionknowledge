@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Discount factor curve</title>
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #08111f; overflow: hidden; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Helvetica Neue', sans-serif; color: #f8fafc; }
+  h1 { font-size: 34px; color: #59d5e0; margin: 0 0 8px; }
+  .sub { font-size: 20px; color: #9fb2c8; margin-bottom: 24px; }
+  svg { width: 900px; height: 380px; }
+  .axis line, .axis path { stroke: #10213a; stroke-width: 2; }
+  .axis text { fill: #9fb2c8; font-size: 16px; }
+  .curve { fill: none; stroke: #f7c948; stroke-width: 5; stroke-linecap: round; }
+  .area { fill: rgba(89, 213, 224, 0.18); }
+  .point { fill: #59d5e0; }
+</style>
+</head>
+<body>
+  <h1>Discount factor by rate</h1>
+  <div class="sub">PV = 1 / (1 + r)<sup>t</sup> for a 3-year horizon</div>
+  <svg id="chart" viewBox="0 0 900 380"></svg>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const frame = Number(params.get('frame') || '0');
+    const fps = Number(params.get('fps') || '30');
+    const totalFrames = Number(params.get('totalFrames') || (3 * fps));
+    const progress = Math.min(1, frame / totalFrames);
+
+    const rates = [0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.15, 0.20];
+    const visible = Math.max(2, Math.ceil(rates.length * progress));
+
+    const svg = document.getElementById('chart');
+    const pad = { left: 60, right: 30, top: 20, bottom: 40 };
+    const W = 900 - pad.left - pad.right;
+    const H = 380 - pad.top - pad.bottom;
+    const xMax = 0.22;
+    const yMax = 1.0;
+
+    function x(r) { return pad.left + (r / xMax) * W; }
+    function y(v) { return pad.top + (1 - v / yMax) * H; }
+
+    const curve = rates.slice(0, visible).map((r) => {
+      const df = Math.pow(1 + r, -3);
+      return x(r).toFixed(1) + ',' + y(df).toFixed(1);
+    }).join(' ');
+
+    let html = '';
+    html += '<line x1="' + pad.left + '" y1="' + (pad.top + H) + '" x2="' + (pad.left + W) + '" y2="' + (pad.top + H) + '" stroke="#10213a" stroke-width="2"/>';
+    html += '<line x1="' + pad.left + '" y1="' + pad.top + '" x2="' + pad.left + '" y2="' + (pad.top + H) + '" stroke="#10213a" stroke-width="2"/>';
+    for (const r of [0, 0.05, 0.1, 0.15, 0.2]) {
+      html += '<text x="' + x(r) + '" y="' + (pad.top + H + 28) + '" text-anchor="middle" fill="#9fb2c8" font-size="15">' + (r * 100).toFixed(0) + '%</text>';
+    }
+    for (const v of [0.25, 0.5, 0.75, 1]) {
+      html += '<text x="' + (pad.left - 12) + '" y="' + (y(v) + 6) + '" text-anchor="end" fill="#9fb2c8" font-size="15">' + v.toFixed(2) + '</text>';
+    }
+    if (curve.length > 1) {
+      html += '<polygon points="' + pad.left + ',' + (pad.top + H) + ' ' + curve + ' ' + x(rates[visible - 1]) + ',' + (pad.top + H) + '" class="area"/>';
+      html += '<polyline points="' + curve + '" class="curve"/>';
+      const last = curve.split(' ').pop().split(',');
+      html += '<circle cx="' + last[0] + '" cy="' + last[1] + '" r="7" class="point"/>';
+    }
+    svg.innerHTML = html;
+  </script>
+</body>
+</html>

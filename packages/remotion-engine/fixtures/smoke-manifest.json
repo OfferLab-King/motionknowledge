@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "smoke-manifest-1",
+  "projectId": "11111111-1111-1111-1111-111111111111",
+  "title": "Smoke render",
+  "width": 640,
+  "height": 360,
+  "fps": 30,
+  "totalDurationInFrames": 150,
+  "theme": {
+    "background": "#08111F",
+    "surface": "#10213A",
+    "primary": "#59D5E0",
+    "accent": "#F7C948",
+    "text": "#F8FAFC",
+    "muted": "#9FB2C8",
+    "danger": "#FB7185",
+    "safeAreaX": 96,
+    "safeAreaY": 64
+  },
+  "scenes": [
+    {
+      "sceneVersionId": "sv-smoke-title",
+      "sceneId": "scene-smoke-title",
+      "title": "What is a Discounted Cash Flow?",
+      "index": 0,
+      "startFrame": 0,
+      "durationInFrames": 90,
+      "fps": 30,
+      "narrationAudioKey": null,
+      "narrationStartMs": 0,
+      "captionSegments": [],
+      "visual": {
+        "type": "title-hero",
+        "schemaVersion": 1,
+        "intent": "introduce",
+        "data": {
+          "title": "What is a Discounted Cash Flow?",
+          "subtitle": "A short render smoke test",
+          "kicker": "Smoke"
+        }
+      },
+      "inputHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "sceneVersionId": "sv-smoke-formula",
+      "sceneId": "scene-smoke-formula",
+      "title": "The discount formula",
+      "index": 1,
+      "startFrame": 90,
+      "durationInFrames": 60,
+      "fps": 30,
+      "narrationAudioKey": null,
+      "narrationStartMs": 0,
+      "captionSegments": [],
+      "visual": {
+        "type": "formula",
+        "schemaVersion": 1,
+        "intent": "define",
+        "data": {
+          "title": "The discount formula",
+          "formula": "PV = CF / (1 + r)^t",
+          "description": "Present value of a future cash flow"
+        }
+      },
+      "inputHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  ],
+  "audioTracks": [],
+  "musicTrackKey": null,
+  "inputHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+}

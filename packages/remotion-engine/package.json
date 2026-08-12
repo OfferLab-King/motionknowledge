@@ -1,0 +1,33 @@
+{
+  "name": "@motionknowledge/remotion-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "echo 'no lint configured'",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'no unit tests'",
+    "test:smoke": "vitest run render.smoke.test.ts"
+  },
+  "dependencies": {
+    "@motionknowledge/assets": "workspace:*",
+    "@motionknowledge/schemas": "workspace:*",
+    "@motionknowledge/visual-library": "workspace:*",
+    "@motionknowledge/visual-router": "workspace:*",
+    "@remotion/bundler": "4.0.508",
+    "@remotion/renderer": "4.0.508",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "remotion": "4.0.508"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}

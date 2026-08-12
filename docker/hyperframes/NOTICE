@@ -1,0 +1,16 @@
+MotionKnowledge HyperFrames adapter
+
+The HyperFrames project (https://github.com/heygen-com/hyperframes) is
+licensed under the Apache License, Version 2.0. Copyright HeyGen.
+
+MotionKnowledge does not redistribute HyperFrames source code or assets.
+The sandboxed specialist-render container in docker/hyperframes/ is an
+independent implementation that renders bounded HTML/SVG scenes with
+headless Chromium and FFmpeg. HeyGen trademarks are not used.
+
+This container image additionally includes:
+- Node.js (MIT), distributed in node:24-alpine
+- Chromium (BSD-3-Clause), Alpine package
+- FFmpeg (LGPL/GPL), Alpine package
+
+See the Apache-2.0 license text at https://www.apache.org/licenses/LICENSE-2.0

@@ -1,0 +1,27 @@
+{
+  "name": "@motionknowledge/hyperframes-adapter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "echo 'no lint configured'",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run adapter.test.ts",
+    "test:integration": "vitest run adapter.integration.test.ts"
+  },
+  "dependencies": {
+    "@motionknowledge/assets": "workspace:*",
+    "@motionknowledge/providers": "workspace:*",
+    "@motionknowledge/schemas": "workspace:*",
+    "@motionknowledge/storage": "workspace:*",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}

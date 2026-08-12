@@ -1,0 +1,29 @@
+{
+  "name": "video-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "echo 'no lint configured'",
+    "typecheck": "tsc --noEmit",
+    "dev": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts ProjectComposition"
+  },
+  "dependencies": {
+    "@motionknowledge/remotion-engine": "workspace:*",
+    "@motionknowledge/schemas": "workspace:*",
+    "@remotion/bundler": "4.0.508",
+    "@remotion/cli": "4.0.508",
+    "@remotion/renderer": "4.0.508",
+    "@remotion/studio": "4.0.508",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "remotion": "4.0.508"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,4 +1,4 @@
-import {stableHash} from '@motionknowledge/schemas';
+import {stableHash} from '@motionknowledge/schemas/hash';
 import type {JobName} from './names';
 
 export type JobEnvelope<T> = Readonly<{
