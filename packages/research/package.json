@@ -1,5 +1,5 @@
 {
-  "name": "@motionknowledge/providers",
+  "name": "@motionknowledge/research",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,10 +12,14 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@motionknowledge/assets": "workspace:*",
+    "@motionknowledge/providers": "workspace:*",
     "@motionknowledge/schemas": "workspace:*",
-    "openai": "7.4.0",
-    "zod": "4.4.3",
-    "zod-to-json-schema": "3.25.2"
+    "@motionknowledge/usage": "workspace:*",
+    "file-type": "22.0.1",
+    "ipaddr.js": "2.5.0",
+    "officeparser": "7.5.1",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@types/node": "24.10.1",
