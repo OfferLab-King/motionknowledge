@@ -20,3 +20,4 @@ var/scratch/
 supabase/.branches
 supabase/.temp
 supabase/.status
+.turbo/

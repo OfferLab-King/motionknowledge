@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "id": "lesson-plan-mock",
+  "title": "What is a Discounted Cash Flow?",
+  "audienceLevel": "beginner",
+  "targetDurationSeconds": 300,
+  "language": "en",
+  "tone": "professional",
+  "learningObjectives": [
+    {
+      "id": "obj-1",
+      "text": "Explain why a future dollar is worth less than a dollar today"
+    },
+    {
+      "id": "obj-2",
+      "text": "Apply the present-value formula to a simple cash flow"
+    },
+    {
+      "id": "obj-3",
+      "text": "Describe what the discount rate represents"
+    },
+    {
+      "id": "obj-4",
+      "text": "Compare present value with cost to frame an investment decision"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec-1",
+      "title": "Introduction",
+      "objectiveIds": [
+        "obj-1"
+      ],
+      "claimIds": [
+        "claim-dcf-definition"
+      ],
+      "prereqSectionIds": [],
+      "durationSeconds": 40
+    },
+    {
+      "id": "sec-2",
+      "title": "Cash flows over time",
+      "objectiveIds": [
+        "obj-1"
+      ],
+      "claimIds": [
+        "claim-dcf-timetime"
+      ],
+      "prereqSectionIds": [
+        "sec-1"
+      ],
+      "durationSeconds": 50
+    },
+    {
+      "id": "sec-3",
+      "title": "The discount formula",
+      "objectiveIds": [
+        "obj-2",
+        "obj-3"
+      ],
+      "claimIds": [
+        "claim-dcf-formula",
+        "claim-dcf-rate"
+      ],
+      "prereqSectionIds": [
+        "sec-2"
+      ],
+      "durationSeconds": 70
+    },
+    {
+      "id": "sec-4",
+      "title": "Step-by-step calculation",
+      "objectiveIds": [
+        "obj-2"
+      ],
+      "claimIds": [
+        "claim-dcf-formula"
+      ],
+      "prereqSectionIds": [
+        "sec-3"
+      ],
+      "durationSeconds": 80
+    },
+    {
+      "id": "sec-5",
+      "title": "Comparing value and cost",
+      "objectiveIds": [
+        "obj-4"
+      ],
+      "claimIds": [
+        "claim-dcf-compare",
+        "claim-dcf-rate"
+      ],
+      "prereqSectionIds": [
+        "sec-4"
+      ],
+      "durationSeconds": 40
+    },
+    {
+      "id": "sec-6",
+      "title": "Summary and disclaimer",
+      "objectiveIds": [
+        "obj-4"
+      ],
+      "claimIds": [
+        "claim-dcf-compare"
+      ],
+      "prereqSectionIds": [
+        "sec-5"
+      ],
+      "durationSeconds": 20
+    }
+  ],
+  "_topicHint": "What is a Discounted Cash Flow?"
+}

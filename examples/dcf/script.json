@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "id": "script-mock",
+  "title": "What is a Discounted Cash Flow?",
+  "language": "en",
+  "tone": "professional",
+  "chapters": [
+    {
+      "id": "chapter-1",
+      "title": "Introduction",
+      "sectionId": "sec-1",
+      "segments": [
+        {
+          "id": "segment-1-1",
+          "chapterId": "chapter-1",
+          "sectionId": "sec-1",
+          "text": "Welcome. Today we answer a classic finance question: what is a discounted cash flow, or DCF, and what does it tell you about an investment?",
+          "claimIds": [
+            "claim-dcf-definition"
+          ]
+        },
+        {
+          "id": "segment-1-2",
+          "chapterId": "chapter-1",
+          "sectionId": "sec-1",
+          "text": "At its core, a DCF estimates the value of an investment from the cash it is expected to produce in the future. This is an educational overview, not investment advice.",
+          "claimIds": [
+            "claim-dcf-definition"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chapter-2",
+      "title": "Cash flows over time",
+      "sectionId": "sec-2",
+      "segments": [
+        {
+          "id": "segment-2-1",
+          "chapterId": "chapter-2",
+          "sectionId": "sec-2",
+          "text": "First, think about time. Money received in the future is worth less than the same amount today, because it cannot earn returns in the meantime.",
+          "claimIds": [
+            "claim-dcf-timetime"
+          ]
+        },
+        {
+          "id": "segment-2-2",
+          "chapterId": "chapter-2",
+          "sectionId": "sec-2",
+          "text": "Imagine a project that expects thirty, then forty, then fifty dollars in the next three years. Those are future cash flows, and we need to convert them into today’s terms.",
+          "claimIds": [
+            "claim-dcf-timetime"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chapter-3",
+      "title": "The discount formula",
+      "sectionId": "sec-3",
+      "segments": [
+        {
+          "id": "segment-3-1",
+          "chapterId": "chapter-3",
+          "sectionId": "sec-3",
+          "text": "The conversion is done with the discount formula. The present value of a single cash flow is the cash flow divided by one plus the discount rate, raised to the number of years.",
+          "claimIds": [
+            "claim-dcf-formula"
+          ]
+        },
+        {
+          "id": "segment-3-2",
+          "chapterId": "chapter-3",
+          "sectionId": "sec-3",
+          "text": "The discount rate reflects both risk and the time value of money. A higher discount rate gives a lower present value, because we weigh future money less heavily.",
+          "claimIds": [
+            "claim-dcf-rate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chapter-4",
+      "title": "Step-by-step calculation",
+      "sectionId": "sec-4",
+      "segments": [
+        {
+          "id": "segment-4-1",
+          "chapterId": "chapter-4",
+          "sectionId": "sec-4",
+          "text": "Let us apply the formula step by step at a ten percent discount rate. Thirty dollars one year out becomes about twenty-seven dollars and twenty-seven cents today.",
+          "claimIds": [
+            "claim-dcf-formula"
+          ]
+        },
+        {
+          "id": "segment-4-2",
+          "chapterId": "chapter-4",
+          "sectionId": "sec-4",
+          "text": "Forty dollars two years out becomes about thirty-three dollars and six cents, and fifty dollars three years out becomes about thirty-seven dollars and fifty-seven cents.",
+          "claimIds": [
+            "claim-dcf-formula"
+          ]
+        },
+        {
+          "id": "segment-4-3",
+          "chapterId": "chapter-4",
+          "sectionId": "sec-4",
+          "text": "Adding these gives a total present value of roughly ninety-eight dollars.",
+          "claimIds": [
+            "claim-dcf-formula"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chapter-5",
+      "title": "Comparing value and cost",
+      "sectionId": "sec-5",
+      "segments": [
+        {
+          "id": "segment-5-1",
+          "chapterId": "chapter-5",
+          "sectionId": "sec-5",
+          "text": "Now compare. If the investment costs one hundred dollars today but its future cash flows are worth ninety-eight dollars today, the math is not in your favor at a ten percent rate.",
+          "claimIds": [
+            "claim-dcf-compare"
+          ]
+        },
+        {
+          "id": "segment-5-2",
+          "chapterId": "chapter-5",
+          "sectionId": "sec-5",
+          "text": "A lower discount rate would push the value up; a higher one pushes it down. The model makes assumptions explicit, but it is an estimate, not a guarantee.",
+          "claimIds": [
+            "claim-dcf-rate",
+            "claim-dcf-compare"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chapter-6",
+      "title": "Summary",
+      "sectionId": "sec-6",
+      "segments": [
+        {
+          "id": "segment-6-1",
+          "chapterId": "chapter-6",
+          "sectionId": "sec-6",
+          "text": "To summarize: DCF discounts future cash flows, uses the discount rate to capture risk and time, and compares the resulting value with the cost today.",
+          "claimIds": [
+            "claim-dcf-definition",
+            "claim-dcf-compare"
+          ]
+        },
+        {
+          "id": "segment-6-2",
+          "chapterId": "chapter-6",
+          "sectionId": "sec-6",
+          "text": "Remember, this is educational material, not investment advice. Thanks for watching, and keep building your finance foundation.",
+          "claimIds": [
+            "claim-dcf-compare"
+          ]
+        }
+      ]
+    }
+  ]
+}

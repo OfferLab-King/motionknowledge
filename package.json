@@ -11,11 +11,15 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
-    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "dcf:generate": "tsx scripts/generate-dcf.ts",
+    "dcf:preview": "tsx scripts/preview-dcf.ts",
+    "dcf:render": "tsx scripts/render-dcf.ts"
   },
   "devDependencies": {
     "turbo": "2.10.9",
     "typescript": "5.9.3",
-    "vitest": "4.1.10"
+    "vitest": "4.1.10",
+    "tsx": "4.20.6"
   }
 }

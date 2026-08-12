@@ -1,0 +1,52 @@
+[
+  {
+    "schemaVersion": 1,
+    "id": "claim-dcf-definition",
+    "text": "A discounted cash flow (DCF) estimates the value of an investment from its expected future cash flows.",
+    "sourceIds": [
+      "src-dcf-core"
+    ],
+    "confidence": "high",
+    "category": "definition"
+  },
+  {
+    "schemaVersion": 1,
+    "id": "claim-dcf-timetime",
+    "text": "Money received in the future is worth less than the same amount today because it cannot earn returns in the meantime.",
+    "sourceIds": [
+      "src-dcf-core"
+    ],
+    "confidence": "high",
+    "category": "principle"
+  },
+  {
+    "schemaVersion": 1,
+    "id": "claim-dcf-formula",
+    "text": "The present value of a single cash flow is the cash flow divided by (1 plus the discount rate) raised to the number of years.",
+    "sourceIds": [
+      "src-dcf-core"
+    ],
+    "confidence": "high",
+    "category": "formula"
+  },
+  {
+    "schemaVersion": 1,
+    "id": "claim-dcf-rate",
+    "text": "A higher discount rate produces a lower present value because future money is weighted less heavily.",
+    "sourceIds": [
+      "src-dcf-core"
+    ],
+    "confidence": "high",
+    "category": "relationship"
+  },
+  {
+    "schemaVersion": 1,
+    "id": "claim-dcf-compare",
+    "text": "When the present value of expected cash flows exceeds the cost today, the investment may be worth considering; DCF is an estimate, not a guarantee.",
+    "sourceIds": [
+      "src-dcf-core"
+    ],
+    "confidence": "medium",
+    "category": "application"
+  }
+]

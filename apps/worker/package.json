@@ -1,0 +1,45 @@
+{
+  "name": "@motionknowledge/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "echo 'no lint configured'",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'no unit tests'",
+    "test:e2e": "vitest run dcf.e2e.test.ts",
+    "start": "node --import tsx src/index.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.2",
+    "@motionknowledge/assets": "workspace:*",
+    "@motionknowledge/audio": "workspace:*",
+    "@motionknowledge/captions": "workspace:*",
+    "@motionknowledge/content-engine": "workspace:*",
+    "@motionknowledge/database": "workspace:*",
+    "@motionknowledge/jobs": "workspace:*",
+    "@motionknowledge/observability": "workspace:*",
+    "@motionknowledge/providers": "workspace:*",
+    "@motionknowledge/remotion-engine": "workspace:*",
+    "@motionknowledge/research": "workspace:*",
+    "@motionknowledge/schemas": "workspace:*",
+    "@motionknowledge/storage": "workspace:*",
+    "@motionknowledge/testkit": "workspace:*",
+    "@motionknowledge/tts": "workspace:*",
+    "@motionknowledge/usage": "workspace:*",
+    "@motionknowledge/visual-router": "workspace:*",
+    "zod": "4.4.3",
+    "@motionknowledge/config": "workspace:*",
+    "@motionknowledge/visual-library": "workspace:*",
+    "pg-boss": "12.27.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}

@@ -11,6 +11,12 @@
     "typecheck": "tsc --noEmit",
     "test": "echo 'no tests'"
   },
+  "dependencies": {
+    "@motionknowledge/database": "workspace:*",
+    "@motionknowledge/providers": "workspace:*",
+    "@motionknowledge/schemas": "workspace:*",
+    "@motionknowledge/tts": "workspace:*"
+  },
   "devDependencies": {
     "@types/node": "24.10.1",
     "typescript": "5.9.3"

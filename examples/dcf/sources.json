@@ -1,0 +1,17 @@
+[
+  {
+    "id": "src-dcf-core",
+    "projectId": "dcf-reference-project",
+    "supplied": true,
+    "kind": "text",
+    "title": "Discounted Cash Flow — Educator Reference",
+    "rawSha256": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "normalizedSha256": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+    "originalUrl": null,
+    "fetchedAt": null,
+    "language": "en",
+    "byteCount": 0,
+    "status": "PROCESSED",
+    "failureReason": null
+  }
+]

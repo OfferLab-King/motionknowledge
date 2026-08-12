@@ -1,0 +1,381 @@
+{
+  "schemaVersion": 1,
+  "id": "storyboard-mock",
+  "theme": {
+    "background": "#08111F",
+    "surface": "#10213A",
+    "primary": "#59D5E0",
+    "accent": "#F7C948",
+    "text": "#F8FAFC",
+    "muted": "#9FB2C8",
+    "danger": "#FB7185",
+    "safeAreaX": 96,
+    "safeAreaY": 64
+  },
+  "scenes": [
+    {
+      "schemaVersion": 1,
+      "id": "scene-title",
+      "sceneVersionId": "scene-title-v1",
+      "index": 0,
+      "title": "Title",
+      "narration": "Welcome. Today we answer a classic finance question: what is a discounted cash flow, and what does it tell you about an investment?",
+      "durationSeconds": 15,
+      "claimIds": [
+        "claim-dcf-definition"
+      ],
+      "chapterId": "chapter-1",
+      "visual": {
+        "type": "title-hero",
+        "schemaVersion": 1,
+        "intent": "introduce",
+        "data": {
+          "title": "What is a Discounted Cash Flow?",
+          "subtitle": "A beginner-friendly, source-grounded explanation",
+          "kicker": "Finance fundamentals"
+        }
+      },
+      "provider": {
+        "provider": "mock",
+        "model": "mock-dcf",
+        "costUsd": "0",
+        "durationMs": 0
+      },
+      "inputHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "scene-definition",
+      "sceneVersionId": "scene-definition-v1",
+      "index": 1,
+      "title": "Definition",
+      "narration": "At its core, a DCF estimates the value of an investment from the cash it is expected to produce in the future. This is educational material, not investment advice.",
+      "durationSeconds": 25,
+      "claimIds": [
+        "claim-dcf-definition"
+      ],
+      "chapterId": "chapter-1",
+      "visual": {
+        "type": "catalog",
+        "schemaVersion": 1,
+        "intent": "define",
+        "data": {
+          "visualId": "definition-card",
+          "title": "Definition",
+          "data": {
+            "term": "Discounted Cash Flow",
+            "definition": "A method that estimates what future money is worth today by applying a discount rate.",
+            "example": "Receiving $110 next year is worth less than $110 today."
+          }
+        }
+      },
+      "provider": {
+        "provider": "mock",
+        "model": "mock-dcf",
+        "costUsd": "0",
+        "durationMs": 0
+      },
+      "inputHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "scene-cashflow-timeline",
+      "sceneVersionId": "scene-cashflow-timeline-v1",
+      "index": 2,
+      "title": "Cash-flow timeline",
+      "narration": "Money received in the future is worth less than the same amount today, because it cannot earn returns in the meantime. A project expects thirty, then forty, then fifty dollars over three years.",
+      "durationSeconds": 30,
+      "claimIds": [
+        "claim-dcf-timetime"
+      ],
+      "chapterId": "chapter-1",
+      "visual": {
+        "type": "cashflow-timeline",
+        "schemaVersion": 1,
+        "intent": "explain",
+        "data": {
+          "title": "Expected cash flows",
+          "periods": [
+            {
+              "year": 0,
+              "label": "Year 0",
+              "amount": -100,
+              "displayAmount": "−$100",
+              "type": "outflow"
+            },
+            {
+              "year": 1,
+              "label": "Year 1",
+              "amount": 30,
+              "displayAmount": "$30",
+              "type": "inflow"
+            },
+            {
+              "year": 2,
+              "label": "Year 2",
+              "amount": 40,
+              "displayAmount": "$40",
+              "type": "inflow"
+            },
+            {
+              "year": 3,
+              "label": "Year 3",
+              "amount": 50,
+              "displayAmount": "$50",
+              "type": "inflow"
+            }
+          ]
+        }
+      },
+      "provider": {
+        "provider": "mock",
+        "model": "mock-dcf",
+        "costUsd": "0",
+        "durationMs": 0
+      },
+      "inputHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "scene-discount-formula",
+      "sceneVersionId": "scene-discount-formula-v1",
+      "index": 3,
+      "title": "The discount formula",
+      "narration": "The present value of a single cash flow is the cash flow divided by one plus the discount rate, raised to the number of years. The discount rate reflects risk and the time value of money.",
+      "durationSeconds": 35,
+      "claimIds": [
+        "claim-dcf-formula",
+        "claim-dcf-rate"
+      ],
+      "chapterId": "chapter-1",
+      "visual": {
+        "type": "formula",
+        "schemaVersion": 1,
+        "intent": "define",
+        "data": {
+          "title": "The discount formula",
+          "formula": "PV = CF / (1 + r)^t",
+          "description": "Present value of a future cash flow CF at rate r over t years"
+        }
+      },
+      "provider": {
+        "provider": "mock",
+        "model": "mock-dcf",
+        "costUsd": "0",
+        "durationMs": 0
+      },
+      "inputHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "scene-calculation",
+      "sceneVersionId": "scene-calculation-v1",
+      "index": 4,
+      "title": "Step-by-step calculation",
+      "narration": "Let us apply the formula step by step at a ten percent discount rate. Thirty dollars one year out becomes about twenty-seven dollars and twenty-seven cents. Forty dollars becomes about thirty-three dollars and six cents. Fifty dollars becomes about thirty-seven dollars and fifty-seven cents. The total is roughly ninety-eight dollars.",
+      "durationSeconds": 55,
+      "claimIds": [
+        "claim-dcf-formula"
+      ],
+      "chapterId": "chapter-1",
+      "visual": {
+        "type": "catalog",
+        "schemaVersion": 1,
+        "intent": "calculate",
+        "data": {
+          "visualId": "step-by-step-calculation",
+          "title": "Present value, step by step",
+          "data": {
+            "title": "Present value, step by step",
+            "steps": [
+              {
+                "expression": "PV₁ = $30 / 1.10",
+                "result": "$27.27"
+              },
+              {
+                "expression": "PV₂ = $40 / 1.10²",
+                "result": "$33.06"
+              },
+              {
+                "expression": "PV₃ = $50 / 1.10³",
+                "result": "$37.57"
+              }
+            ],
+            "conclusion": "Total present value ≈ $97.90"
+          }
+        }
+      },
+      "provider": {
+        "provider": "mock",
+        "model": "mock-dcf",
+        "costUsd": "0",
+        "durationMs": 0
+      },
+      "inputHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "scene-value-rate-chart",
+      "sceneVersionId": "scene-value-rate-chart-v1",
+      "index": 5,
+      "title": "Value versus discount rate",
+      "narration": "A higher discount rate gives a lower present value, because we weigh future money less heavily. This chart shows how value falls as the rate rises.",
+      "durationSeconds": 35,
+      "claimIds": [
+        "claim-dcf-rate"
+      ],
+      "chapterId": "chapter-1",
+      "visual": {
+        "type": "catalog",
+        "schemaVersion": 1,
+        "intent": "compare",
+        "data": {
+          "visualId": "line-chart",
+          "title": "Present value vs discount rate",
+          "data": {
+            "title": "Present value vs discount rate",
+            "series": [
+              {
+                "label": "5%",
+                "value": 106
+              },
+              {
+                "label": "8%",
+                "value": 100
+              },
+              {
+                "label": "10%",
+                "value": 96
+              },
+              {
+                "label": "15%",
+                "value": 87
+              },
+              {
+                "label": "20%",
+                "value": 79
+              }
+            ]
+          }
+        }
+      },
+      "provider": {
+        "provider": "mock",
+        "model": "mock-dcf",
+        "costUsd": "0",
+        "durationMs": 0
+      },
+      "inputHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "scene-comparison",
+      "sceneVersionId": "scene-comparison-v1",
+      "index": 6,
+      "title": "DCF comparison",
+      "narration": "If the investment costs one hundred dollars today but its future cash flows are worth ninety-eight dollars today, the math is not in your favor at a ten percent rate.",
+      "durationSeconds": 30,
+      "claimIds": [
+        "claim-dcf-compare"
+      ],
+      "chapterId": "chapter-1",
+      "visual": {
+        "type": "comparison",
+        "schemaVersion": 1,
+        "intent": "compare",
+        "data": {
+          "title": "Value vs cost",
+          "items": [
+            {
+              "name": "Present value",
+              "value": "≈ $98 at a 10% rate"
+            },
+            {
+              "name": "Cost today",
+              "value": "$100"
+            }
+          ]
+        }
+      },
+      "provider": {
+        "provider": "mock",
+        "model": "mock-dcf",
+        "costUsd": "0",
+        "durationMs": 0
+      },
+      "inputHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "scene-recap",
+      "sceneVersionId": "scene-recap-v1",
+      "index": 7,
+      "title": "Summary",
+      "narration": "To summarize: DCF discounts future cash flows, uses the discount rate to capture risk and time, and compares the resulting value with the cost today.",
+      "durationSeconds": 45,
+      "claimIds": [
+        "claim-dcf-definition",
+        "claim-dcf-compare"
+      ],
+      "chapterId": "chapter-1",
+      "visual": {
+        "type": "catalog",
+        "schemaVersion": 1,
+        "intent": "recap",
+        "data": {
+          "visualId": "summary",
+          "title": "Summary",
+          "data": {
+            "title": "Summary",
+            "points": [
+              "DCF discounts future cash flows",
+              "The discount rate reflects risk and time",
+              "Compare the result with the cost today",
+              "It is a model, not a guarantee"
+            ]
+          }
+        }
+      },
+      "provider": {
+        "provider": "mock",
+        "model": "mock-dcf",
+        "costUsd": "0",
+        "durationMs": 0
+      },
+      "inputHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "schemaVersion": 1,
+      "id": "scene-outro",
+      "sceneVersionId": "scene-outro-v1",
+      "index": 8,
+      "title": "Outro",
+      "narration": "Remember, this is educational material, not investment advice. Thanks for watching, and keep building your finance foundation.",
+      "durationSeconds": 20,
+      "claimIds": [
+        "claim-dcf-compare"
+      ],
+      "chapterId": "chapter-1",
+      "visual": {
+        "type": "catalog",
+        "schemaVersion": 1,
+        "intent": "close",
+        "data": {
+          "visualId": "outro",
+          "title": "Outro",
+          "data": {
+            "title": "Thanks for watching",
+            "tagline": "Educational material — not investment advice"
+          }
+        }
+      },
+      "provider": {
+        "provider": "mock",
+        "model": "mock-dcf",
+        "costUsd": "0",
+        "durationMs": 0
+      },
+      "inputHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}
