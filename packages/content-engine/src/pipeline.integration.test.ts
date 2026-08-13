@@ -1,7 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {ContentPipeline} from './pipeline';
 import {MockProvider, dcfClaims} from '@motionknowledge/providers';
-import {visualFixtures} from '@motionknowledge/visual-library';
 import type {LLMProvider, ProviderResult} from '@motionknowledge/providers';
 import {LessonPlanV1} from '@motionknowledge/schemas';
 
@@ -77,7 +76,7 @@ describe('content pipeline traceability', () => {
     expect(storyboard.scenes.every((scene) => scene.claimIds.length > 0)).toBe(true);
   });
 
-  it('substitutes invalid catalog payloads with the registry example payload', async () => {
+  it('substitutes invalid catalog payloads with a topic-neutral payload', async () => {
     const storyboard = await pipelineWithBrokenModel().generateStoryboard(
       {
         script: {
@@ -106,7 +105,10 @@ describe('content pipeline traceability', () => {
       {},
     );
     const scene = storyboard.scenes[0]!;
-    expect((scene.visual as {data: {data: unknown}}).data.data).toEqual(visualFixtures['bullet-reveal']);
+    expect((scene.visual as {data: {data: unknown}}).data.data).toEqual({
+      title: 'Broken',
+      bullets: ['First point', 'Second point', 'Third point'],
+    });
   });
 });
 

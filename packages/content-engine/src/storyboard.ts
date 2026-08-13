@@ -7,7 +7,7 @@ import {
   type Storyboard,
 } from '@motionknowledge/schemas';
 import type {LLMProvider} from '@motionknowledge/providers';
-import {getVisualDefinition, visualFixtures} from '@motionknowledge/visual-library';
+import {repairCatalogVisualData} from './neutral';
 import {STORYBOARD_SYSTEM, visualCatalogForPrompt, wrapUntrusted} from './prompts';
 
 export interface GenerateStoryboardInput {
@@ -57,22 +57,7 @@ export async function generateStoryboard(
   return storyboard;
 }
 
-/**
- * Catalog visuals reference a registered component plus model-supplied props.
- * Models occasionally emit props that do not satisfy the component's schema;
- * such invalid output must never be promoted. The scene keeps its intent but
- * renders the registry's canonical example payload for the visual instead.
- */
-export function repairCatalogVisualData(scene: Scene): void {
-  const visual = scene.visual;
-  if (visual.type !== 'catalog') return;
-  const definition = getVisualDefinition(visual.data.visualId);
-  if (!definition) return;
-  const parsed = definition.propsSchema.safeParse(visual.data.data);
-  if (!parsed.success) {
-    visual.data.data = visualFixtures[definition.id];
-  }
-}
+export {repairCatalogVisualData} from './neutral';
 
 export function applySceneLocalEdit(scene: Scene, patch: Partial<Pick<Scene, 'title' | 'narration' | 'durationSeconds'>>): Scene {
   return {
