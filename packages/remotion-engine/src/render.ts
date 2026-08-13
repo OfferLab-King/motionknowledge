@@ -5,7 +5,7 @@ import {RenderManifestV1} from '@motionknowledge/schemas';
 import {createHash} from 'node:crypto';
 import {mkdir, mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
 import {dirname, join} from 'node:path';
-import {tmpdir} from 'node:os';
+import {availableParallelism, tmpdir} from 'node:os';
 
 export interface RenderOutput {
   path: string;
@@ -49,7 +49,7 @@ export async function renderProject(manifest: RenderManifest, outputPath: string
       serveUrl,
       codec: 'h264',
       outputLocation: outputPath,
-      concurrency: 4,
+      concurrency: Math.min(4, availableParallelism()),
     });
     const bytes = await readFile(outputPath);
     return {
