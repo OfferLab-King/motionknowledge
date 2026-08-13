@@ -33,9 +33,11 @@ jobs:
         with:
           version: 2.113.0
 
+      - name: Supabase start
+        run: supabase start
+
       - name: Run Supabase migrations
-        run: supabase db reset --debug
-        working-directory: .
+        run: supabase db reset
 
       - name: Lint
         run: pnpm lint
@@ -46,8 +48,8 @@ jobs:
       - name: Unit + integration tests
         run: pnpm test
         env:
-          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
-          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54332/postgres
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54331
           SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_JWT_SECRET: ${{ env.SUPABASE_JWT_SECRET }}
 
@@ -60,7 +62,6 @@ jobs:
   database-integration:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: verify
     steps:
       - uses: actions/checkout@v4
       - name: Enable corepack
@@ -75,10 +76,12 @@ jobs:
         uses: supabase/setup-cli@v1
         with:
           version: 2.113.0
+      - name: Supabase start
+        run: supabase start
       - name: Run Supabase migrations
         run: supabase db reset
       - name: Database integration tests (RLS, idempotency)
         run: pnpm --filter @motionknowledge/database test:integration && pnpm --filter @motionknowledge/jobs test:integration
         env:
-          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
-          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54332/postgres
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54331
