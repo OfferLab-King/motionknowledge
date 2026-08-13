@@ -1,5 +1,7 @@
+import {join} from 'node:path';
+import {config as loadDotenv} from 'dotenv';
 import {createDatabaseClient, type Database} from '@motionknowledge/database';
-import {createStorageProvider} from '@motionknowledge/storage';
+import {createStorageProvider, resolveRepoRoot} from '@motionknowledge/storage';
 import {UsageLedgerImpl, type UsageLedger} from '@motionknowledge/usage';
 import {ContentPipeline} from '@motionknowledge/content-engine';
 import {ResearchService} from '@motionknowledge/research';
@@ -11,6 +13,11 @@ import {MockProvider, OpenAIProvider, type LLMProvider, type TTSProvider, type S
 import {createLogger, type StructuredLogger} from '@motionknowledge/observability';
 import type {JobQueue} from '@motionknowledge/jobs';
 import {localStorageRoot} from './lib/paths';
+
+// Load the repository .env for worker and CLI processes (the web app loads it
+// natively). The project .env wins over stale shell exports so local runs are
+// deterministic; CI and deployments have no root .env and use process env.
+loadDotenv({path: join(resolveRepoRoot(), '.env'), override: true});
 
 export interface WorkerConfig {
   databaseUrl: string;

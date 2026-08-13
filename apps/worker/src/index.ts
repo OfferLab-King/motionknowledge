@@ -9,7 +9,8 @@ async function main(): Promise<void> {
   const boss = await startBoss(env.DATABASE_URL, [...JOB_NAMES]);
   attachQueue(deps, new PgBossJobQueue(boss, deps.db));
   await attachBossHandlers(boss, deps);
-  deps.logger.info('worker started', {queues: JOB_NAMES.length});
+  const dbHost = new URL(env.DATABASE_URL).host;
+  deps.logger.info('worker started', {queues: JOB_NAMES.length, databaseHost: dbHost});
   const shutdown = async () => {
     deps.logger.info('worker stopping');
     await boss.stop();
