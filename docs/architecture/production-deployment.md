@@ -103,3 +103,20 @@ Supabase is the default because it combines Postgres, Auth, RLS, Storage, signed
 ## Production Readiness Gate
 
 Do not launch paid production until tenant isolation, signed URLs, URL-ingestion SSRF defenses, hostile document handling, render sandboxing, backup restore, provider budget limits, Remotion licensing, asset licenses, and end-to-end media verification have all passed documented checks.
+
+## Status of this implementation
+
+The first commercial release is implemented and verified locally against these controls:
+
+- Tenant isolation: RLS policies + server-side workspace authorization, verified by
+  `rls.integration.test.ts` and the browser `tenant-isolation` e2e.
+- Signed downloads: HMAC-signed short-lived object URLs (5 minutes), verified in the tenant e2e.
+- SSRF: DNS-before-and-after-redirect checks for loopback/private/link-local/metadata ranges.
+- Hostile documents: content sniffing, HTML stripping, bounded sizes, provenance policy.
+- Render sandbox: `docker/hyperframes` container with `--network=none --read-only` and resource
+  caps; ffprobe-validated outputs.
+- Remotion licensing: Automators plan budgeted; terms rechecked before launch.
+- Media verification: short CI render + full DCF acceptance render (MP4/SRT) with ffprobe.
+
+Local development runs entirely on deterministic mock providers; paid providers activate only when
+their environment variables are present (see `docs/development/providers.md`).

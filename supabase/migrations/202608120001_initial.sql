@@ -299,6 +299,7 @@ create table public.qa_versions (
   workspace_id uuid not null references public.workspaces (id) on delete cascade,
   schema_version integer not null default 1,
   payload jsonb not null,
+  input_hash text not null,
   is_active boolean not null default false,
   created_at timestamptz not null default now()
 );
@@ -320,6 +321,7 @@ create table public.youtube_metadata_versions (
   workspace_id uuid not null references public.workspaces (id) on delete cascade,
   schema_version integer not null default 1,
   payload jsonb not null,
+  input_hash text not null,
   is_active boolean not null default false,
   created_at timestamptz not null default now()
 );

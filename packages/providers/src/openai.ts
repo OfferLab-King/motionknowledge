@@ -12,10 +12,12 @@ type ZodToJsonSchemaInput = Parameters<typeof zodToJsonSchema>[0];
 
 export class OpenAIProvider implements LLMProvider {
   readonly provider = 'openai';
+  readonly model: string;
   private readonly client: OpenAI;
 
   constructor(private readonly config: OpenAIProviderConfig) {
     this.client = new OpenAI({apiKey: config.apiKey});
+    this.model = config.model;
   }
 
   async generateStructured<T>(input: {

@@ -4,6 +4,7 @@ import {getSessionUser} from '../../../../../../../lib/supabase/auth';
 import {getServiceDb} from '../../../../../../../lib/db';
 import {getWorkspaceMemberships} from '../../../../../../../services/projects';
 import {enqueueSceneRegeneration} from '../../../../../../../services/scenes';
+import {track} from '@motionknowledge/analytics';
 
 const RegenerateSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -33,6 +34,7 @@ export async function POST(request: Request, {params}: {params: Promise<{project
       sceneKey: sceneId,
       patch: parsed.data,
     });
+    track({event: 'scene_regenerated', userId: user.id, workspaceId, projectId, properties: {sceneId}});
     return NextResponse.json({jobId, enqueued: true});
   } catch (error) {
     return NextResponse.json({error: error instanceof Error ? error.message : 'enqueue failed'}, {status: 400});

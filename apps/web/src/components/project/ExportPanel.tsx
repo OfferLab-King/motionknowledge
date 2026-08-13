@@ -1,0 +1,111 @@
+'use client';
+
+import {useEffect, useState} from 'react';
+import {Button, StatusPill} from '@motionknowledge/ui';
+
+export interface ExportFile {
+  kind: string;
+  label: string;
+  fileName: string;
+}
+
+export interface ExportView {
+  renderId: string;
+  status: string;
+  createdAt: string;
+  durationSeconds: number | null;
+  width: number | null;
+  height: number | null;
+  files: ExportFile[];
+}
+
+export function ExportPanel(props: {
+  projectId: string;
+  initialRenders: ExportView[];
+  projectStatus: string;
+}) {
+  const {projectId} = props;
+  const [renders, setRenders] = useState<ExportView[]>(props.initialRenders);
+  const [projectStatus, setProjectStatus] = useState(props.projectStatus);
+  const [busy, setBusy] = useState(false);
+
+  async function refresh() {
+    const response = await fetch(`/api/projects/${projectId}/exports`, {cache: 'no-store'});
+    if (response.ok) {
+      const data = (await response.json()) as {renders: ExportView[]; projectStatus: string};
+      setRenders(data.renders);
+      setProjectStatus(data.projectStatus);
+    }
+  }
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      void refresh();
+    }, 5000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId]);
+
+  async function requestRender() {
+    setBusy(true);
+    try {
+      await fetch(`/api/projects/${projectId}/render`, {method: 'POST'});
+      await refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const renderable = projectStatus === 'READY_FOR_REVIEW' || projectStatus === 'APPROVED';
+  const complete = renders.find((render) => render.status === 'succeeded');
+
+  return (
+    <div className="space-y-4">
+      {!complete ? (
+        <div className="flex items-center gap-4 rounded-lg border border-[#2a4568] bg-[#0f1c30] p-4">
+          <div>
+            <p className="font-medium text-[#f8fafc]">Final render</p>
+            <p className="text-sm text-[#9fb2c8]">
+              Project status: {projectStatus.replace(/_/g, ' ').toLowerCase()}
+            </p>
+          </div>
+          <div className="ml-auto">
+            <Button type="button" disabled={!renderable || busy} onClick={() => void requestRender()}>
+              Final render
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      {complete ? (
+        <div className="rounded-lg border border-[#4ade80] bg-[#0f1c30] p-4">
+          <div className="mb-2 flex items-center gap-3">
+            <span className="font-medium text-[#4ade80]">Render complete</span>
+            <StatusPill status={complete.status} />
+            <span className="text-sm text-[#9fb2c8]">
+              {complete.durationSeconds ? `${Math.round(complete.durationSeconds)}s · ` : ''}
+              {complete.width && complete.height ? `${complete.width}x${complete.height}` : ''}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {complete.files.map((file) => (
+              <a
+                key={file.kind}
+                href={`/api/projects/${projectId}/downloads/${complete.renderId}?file=${file.kind}`}
+                className="rounded-lg bg-[#59d5e0] px-4 py-2 text-sm font-semibold text-[#08111f] hover:bg-[#4bc4d0]"
+                download={file.fileName}
+              >
+                Download {file.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <p className="text-sm text-[#9fb2c8]">
+          {projectStatus === 'READY_FOR_REVIEW' || projectStatus === 'APPROVED'
+            ? 'Ready to render — click Final render to enqueue the export.'
+            : 'The final render becomes available after the project is approved.'}
+        </p>
+      )}
+    </div>
+  );
+}

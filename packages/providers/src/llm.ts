@@ -25,5 +25,7 @@ export interface GenerateStructuredInput<T> {
 }
 
 export interface LLMProvider {
+  readonly provider: string;
+  readonly model: string;
   generateStructured<T>(input: GenerateStructuredInput<T>): Promise<ProviderResult<T>>;
 }

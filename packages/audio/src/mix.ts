@@ -73,5 +73,53 @@ export class FfmpegAudioMixer implements AudioMixer {
   }
 }
 
+export async function attachNarrationToVideo(input: {
+  videoPath: string;
+  narrationTracks: Array<{path: string; offsetMs: number}>;
+  outputPath: string;
+  videoDurationSeconds?: number;
+}): Promise<{path: string; durationSeconds: number}> {
+  if (input.narrationTracks.length === 0) {
+    await import('node:fs/promises').then(({copyFile}) => copyFile(input.videoPath, input.outputPath));
+    const probe = await probeAudio(input.outputPath);
+    return {path: input.outputPath, durationSeconds: probe.durationSeconds};
+  }
+  const inputs = [input.videoPath, ...input.narrationTracks.map((track) => track.path)];
+  const filters: string[] = [];
+  const mixedLabels: string[] = [];
+  input.narrationTracks.forEach((track, index) => {
+    const label = `[n${index}]`;
+    const inputIndex = index + 1;
+    filters.push(
+      `[${inputIndex}:a]aresample=48000,pan=stereo|c0=c0|c1=c0,adelay=${track.offsetMs}|${track.offsetMs},apad=pad_dur=2${label}`,
+    );
+    mixedLabels.push(label);
+  });
+  const loud = loudnormPlan(-16);
+  let mixedMap: string;
+  if (mixedLabels.length > 1) {
+    filters.push(`${mixedLabels.join('')}amix=inputs=${mixedLabels.length}:normalize=0[mixed]`);
+    mixedMap = '[mixed]';
+  } else {
+    mixedMap = mixedLabels[0]!;
+  }
+  filters.push(`${mixedMap}loudnorm=I=${loud.targetLufs}:TP=-1.5:LRA=11[out]`);
+  const args = [
+    '-y',
+    ...inputs.flatMap((path) => ['-i', path]),
+    '-filter_complex', filters.join(';'),
+    '-map', '0:v',
+    '-map', '[out]',
+    '-c:v', 'copy',
+    '-c:a', 'aac',
+    '-b:a', '192k',
+    '-movflags', '+faststart',
+    input.outputPath,
+  ].filter((arg): arg is string => typeof arg === 'string');
+  await runFfmpeg(args);
+  const probe = await probeAudio(input.outputPath);
+  return {path: input.outputPath, durationSeconds: probe.durationSeconds};
+}
+
 export {probeAudio, runFfmpeg};
 export {loudnormPlan, isWithinLoudnessRange} from './loudness';

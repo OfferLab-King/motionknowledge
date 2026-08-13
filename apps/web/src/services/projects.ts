@@ -15,6 +15,7 @@ import {ProjectRepositoryImpl} from '@motionknowledge/database';
 import {z} from 'zod';
 import {getServiceDb} from '../lib/db';
 import {getSessionUser} from '../lib/supabase/auth';
+import {track} from '@motionknowledge/analytics';
 
 const CreateProjectSchema = z.object({
   title: z.string().min(3, 'Topic must be at least 3 characters').max(200),
@@ -92,6 +93,27 @@ export async function createProjectAction(formData: FormData): Promise<void> {
       status: 'PENDING',
     })
     .onConflictDoNothing();
+
+  const {getQueue} = await import('../lib/jobs');
+  const {computeInputHash, buildIdempotencyKey} = await import('@motionknowledge/jobs');
+  const queue = await getQueue();
+  const inputHash = computeInputHash({projectId: project.id, topic: parsed.data.title});
+  await queue.enqueue({
+    jobId: `${project.id}-research`,
+    workspaceId: membership.workspaceId,
+    projectId: project.id,
+    operation: 'RESEARCH_PROJECT',
+    inputHash,
+    idempotencyKey: buildIdempotencyKey({
+      workspaceId: membership.workspaceId,
+      projectId: project.id,
+      operation: 'RESEARCH_PROJECT',
+      inputHash,
+    }),
+    payload: {workspaceId: membership.workspaceId, projectId: project.id},
+  });
+
+  track({event: 'project_created', userId: user.id, workspaceId: membership.workspaceId, projectId: project.id});
   revalidatePath('/dashboard');
   redirect(`/projects/${project.id}`);
 }

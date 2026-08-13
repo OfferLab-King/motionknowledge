@@ -3,6 +3,9 @@
 import {redirect} from 'next/navigation';
 import {z} from 'zod';
 import {createClient} from '../../lib/supabase/server';
+import {getServiceDb} from '../../lib/db';
+import {ensureWorkspaceForUser} from '../../services/projects';
+import {track} from '@motionknowledge/analytics';
 
 const AuthSchema = z.object({
   email: z.string().email(),
@@ -18,9 +21,13 @@ export async function signUpAction(formData: FormData) {
     redirect('/register?error=invalid');
   }
   const supabase = await createClient();
-  const {error} = await supabase.auth.signUp(parsed.data);
+  const {data, error} = await supabase.auth.signUp(parsed.data);
   if (error) {
     redirect(`/register?error=${encodeURIComponent(error.message)}`);
+  }
+  if (data.user) {
+    const membership = await ensureWorkspaceForUser(data.user.id, getServiceDb());
+    track({event: 'signup', userId: data.user.id, workspaceId: membership.workspaceId});
   }
   redirect('/dashboard');
 }

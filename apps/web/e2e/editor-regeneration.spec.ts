@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import {eq} from 'drizzle-orm';
+import {eq, sql} from 'drizzle-orm';
 import {
   createDatabaseClient,
   workspaces,
@@ -20,14 +20,10 @@ import {
 import {DCF_TOPIC, DCF_SOURCE_TEXT} from '@motionknowledge/testkit';
 
 const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54332/postgres';
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54331';
-const SERVICE_ROLE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ??
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
 
+const seededEmail = `editor-${Date.now()}@example.test`;
 let db: Database;
 let seededProjectId = '';
-let seededEmail = '';
 let deps: ReturnType<typeof buildWorkerDeps>;
 let boss: Awaited<ReturnType<typeof startBoss>>;
 
@@ -38,20 +34,30 @@ test.beforeAll(async () => {
   process.env.RENDER_WIDTH = '640';
   process.env.RENDER_HEIGHT = '360';
   ({db} = createDatabaseClient({url: DATABASE_URL}));
-  const {createClient} = await import('@supabase/supabase-js');
-  const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {auth: {persistSession: false}});
-  seededEmail = `editor-${Date.now()}@example.test`;
-  const {data, error} = await admin.auth.admin.createUser({
-    email: seededEmail,
-    password: 'Correct-Horse-42!',
-    email_confirm: true,
-  });
-  if (error || !data.user) throw new Error(`createUser failed: ${error?.message}`);
-  const userId = data.user.id;
+  deps = buildWorkerDeps(process.env);
+  boss = await startBoss(deps.config.databaseUrl, [...JOB_NAMES]);
+  attachQueue(deps, new PgBossJobQueue(boss, deps.db));
+  await attachBossHandlers(boss, deps);
+});
 
-  const workspace = await db.insert(workspaces).values({name: 'Editor E2E Workspace'}).returning();
-  const workspaceId = workspace[0]!.id;
-  await db.insert(workspaceMemberships).values({workspaceId, userId, role: 'owner'});
+test.afterAll(async () => {
+  await boss?.stop();
+});
+
+test('edits and regenerates only one scene', async ({page}) => {
+  test.setTimeout(420_000);
+  await page.goto('/register');
+  await page.getByLabel('Email').fill(seededEmail);
+  await page.getByLabel('Password').fill('Correct-Horse-42!');
+  await page.getByRole('button', {name: 'Create account'}).click();
+  await page.waitForURL('**/dashboard', {timeout: 30_000});
+
+  const userRows = await db.execute(sql`select id from auth.users where email = ${seededEmail} limit 1`);
+  const userId = (userRows[0] as {id?: string})?.id;
+  if (!userId) throw new Error('registered user not found');
+  const membershipRows = await db.execute(sql`select workspace_id from public.workspace_memberships where user_id = ${userId} limit 1`);
+  const workspaceId = String((membershipRows[0] as {workspace_id?: string})?.workspace_id);
+  if (!workspaceId) throw new Error('user has no workspace');
 
   const project = await db
     .insert(projects)
@@ -80,11 +86,6 @@ test.beforeAll(async () => {
     status: 'PROCESSED',
   });
 
-  deps = buildWorkerDeps(process.env);
-  boss = await startBoss(deps.config.databaseUrl, [...JOB_NAMES]);
-  attachQueue(deps, new PgBossJobQueue(boss, deps.db));
-  await attachBossHandlers(boss, deps);
-
   await deps.queue.enqueue({
     jobId: `${seededProjectId}-research`,
     workspaceId,
@@ -104,19 +105,9 @@ test.beforeAll(async () => {
   }
   const final = await db.query.projects.findFirst({where: eq(projects.id, seededProjectId)});
   if (final?.status !== 'READY_FOR_REVIEW') throw new Error('Seeded project did not reach READY_FOR_REVIEW');
-});
 
-test.afterAll(async () => {
-  await boss?.stop();
-});
-
-test('edits and regenerates only one scene', async ({page}) => {
-  await page.goto('/login');
-  await page.getByLabel('Email').fill(seededEmail);
-  await page.getByLabel('Password').fill('Correct-Horse-42!');
-  await page.getByRole('button', {name: 'Sign in'}).click();
   await page.goto(`/projects/${seededProjectId}/editor`);
-
+  await expect(page.getByTestId('scene-definition-version')).toBeVisible({timeout: 30_000});
   const untouchedVersion = await page.getByTestId('scene-definition-version').textContent();
   await page.getByRole('button', {name: 'Step-by-step calculation'}).click();
   await page.getByLabel('Scene title').fill('Present value, step by step');

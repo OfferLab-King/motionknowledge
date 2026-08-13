@@ -31,3 +31,4 @@ export const ResearchDocumentV1 = z.object({
 
 export type ResearchSource = z.infer<typeof ResearchSourceV1>;
 export type ResearchClaim = z.infer<typeof ResearchClaimV1>;
+export type ResearchDocument = z.infer<typeof ResearchDocumentV1>;

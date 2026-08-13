@@ -32,6 +32,12 @@ license obligations as required by the reuse-first policy (ADR 0005).
 | ipaddr.js | 2.5.0 | MIT | IP classification for SSRF control |
 | @google-cloud/text-to-speech | 7.0.0 | Apache-2.0 | economical TTS provider |
 | elevenlabs | 1.59.0 | MIT | premium TTS provider |
+| next | 16.2.11 | MIT | web application framework |
+| @supabase/ssr | 0.12.4 | MIT | Supabase SSR session handling |
+| tailwindcss / @tailwindcss/postcss | 4.3.3 | MIT | styling |
+| @playwright/test | 1.62.1 | Apache-2.0 | browser acceptance tests |
+| @dnd-kit/core / @dnd-kit/sortable | 6.3.1 / 10.0.0 | MIT | editor drag-and-drop |
+| tsx | 4.20.6 | MIT | TypeScript execution for CLI scripts |
 
 Notices for packages adopted in later tasks are appended as they are added.
 

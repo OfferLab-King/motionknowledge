@@ -34,7 +34,8 @@
     "@remotion/player": "4.0.508",
     "remotion": "4.0.508",
     "@motionknowledge/storage": "workspace:*",
-    "pg-boss": "12.27.0"
+    "pg-boss": "12.27.0",
+    "@motionknowledge/analytics": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",

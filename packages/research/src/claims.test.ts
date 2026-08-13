@@ -35,6 +35,8 @@ describe('claim provenance', () => {
   it('rejects claims that cite unknown sources', async () => {
     const service = new ResearchService({
       llm: {
+        provider: 'mock',
+        model: 'mock',
         async generateStructured<T>(input: Parameters<LLMProvider['generateStructured']>[0]) {
           return {
             data: {

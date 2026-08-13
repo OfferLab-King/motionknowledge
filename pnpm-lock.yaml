@@ -72,6 +72,9 @@ importers:
       '@dnd-kit/sortable':
         specifier: 10.0.0
         version: 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@motionknowledge/analytics':
+        specifier: workspace:*
+        version: link:../../packages/analytics
       '@motionknowledge/assets':
         specifier: workspace:*
         version: link:../../packages/assets
@@ -236,6 +239,15 @@ importers:
       vitest:
         specifier: 4.1.10
         version: 4.1.10(@types/node@24.10.1)(vite@8.2.1(@types/node@24.10.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.50.0)(tsx@4.20.6))
+
+  packages/analytics:
+    devDependencies:
+      '@types/node':
+        specifier: 24.10.1
+        version: 24.10.1
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
 
   packages/assets:
     dependencies:
