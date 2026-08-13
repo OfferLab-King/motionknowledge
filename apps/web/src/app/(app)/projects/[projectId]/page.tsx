@@ -51,6 +51,7 @@ export default async function ProjectPage({params}: {params: Promise<{projectId:
           })),
           sceneProgress: {ready: 0, total: 0},
           finalRenderStatus: null,
+          narrationModel: null,
         }}
       />
     </div>

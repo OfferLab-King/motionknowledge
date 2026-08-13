@@ -17,6 +17,7 @@ export interface SynthesizedAudio {
 }
 
 export interface TTSProvider {
+  readonly provider: string;
   synthesize(input: SynthesizeInput): Promise<ProviderResult<SynthesizedAudio>>;
 }
 

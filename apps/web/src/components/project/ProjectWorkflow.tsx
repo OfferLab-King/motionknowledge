@@ -30,6 +30,7 @@ interface ProjectStatusData {
   jobs: JobView[];
   sceneProgress: {ready: number; total: number};
   finalRenderStatus: string | null;
+  narrationModel: string | null;
 }
 
 const STATUS_MESSAGE: Record<string, string> = {
@@ -115,6 +116,7 @@ export function ProjectWorkflow(props: {
               {data.sceneProgress.total > 0 ? (
                 <p className="mt-1 text-xs text-[#9fb2c8]">
                   Scenes ready: {data.sceneProgress.ready}/{data.sceneProgress.total}
+                  {data.narrationModel ? ` · narration: ${data.narrationModel}` : ''}
                 </p>
               ) : null}
             </div>

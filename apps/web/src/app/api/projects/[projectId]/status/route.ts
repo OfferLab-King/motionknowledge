@@ -1,8 +1,10 @@
 import {NextResponse} from 'next/server';
+import {eq} from 'drizzle-orm';
 import {getSessionUser} from '../../../../../lib/supabase/auth';
 import {getServiceDb} from '../../../../../lib/db';
 import {getWorkspaceMemberships} from '../../../../../services/projects';
 import {getActiveArtifact, listJobs, listScenes} from '../../../../../services/artifacts';
+import {audioAssets} from '@motionknowledge/database';
 import {listProjectRenders} from '../../../../../services/downloads';
 import type {LessonPlan, Script, Storyboard} from '@motionknowledge/schemas';
 import type {Scene} from '@motionknowledge/schemas';
@@ -33,6 +35,7 @@ export async function GET(_request: Request, {params}: {params: Promise<{project
   const script = await getActiveArtifact<Script>(db, projectId, workspaceId, 'SCRIPT');
   const storyboard = await getActiveArtifact<Storyboard>(db, projectId, workspaceId, 'STORYBOARD');
   const jobs = await listJobs(db, projectId);
+  const audioRows = await db.select({model: audioAssets.model, provider: audioAssets.provider}).from(audioAssets).where(eq(audioAssets.projectId, projectId)).limit(1);
   const sceneList = await listScenes(db, projectId);
   const renders = await listProjectRenders(db, projectId);
 
@@ -111,6 +114,7 @@ export async function GET(_request: Request, {params}: {params: Promise<{project
       total: sceneList.length,
     },
     finalRenderStatus: renders.at(-1)?.status ?? null,
+    narrationModel: audioRows[0]?.model ?? null,
   });
 }
 
