@@ -8,6 +8,8 @@ export const ServerEnvSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: optionalSecret,
   SUPABASE_JWT_SECRET: optionalSecret,
   OPENAI_API_KEY: optionalSecret,
+  LLM_API_KEY: optionalSecret,
+  LLM_BASE_URL: optionalSecret,
   GOOGLE_TTS_CREDENTIALS_JSON: optionalSecret,
   ELEVENLABS_API_KEY: optionalSecret,
   STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),

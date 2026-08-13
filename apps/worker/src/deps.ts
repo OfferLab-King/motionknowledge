@@ -9,7 +9,7 @@ import {TTSService} from '@motionknowledge/tts';
 import {MockTTSProvider} from '@motionknowledge/tts';
 import {GoogleCloudTTSProvider} from '@motionknowledge/tts';
 import {ElevenLabsProvider} from '@motionknowledge/tts';
-import {MockProvider, OpenAIProvider, type LLMProvider, type TTSProvider, type StorageProvider} from '@motionknowledge/providers';
+import {MockProvider, OpenAIProvider, OpenAICompatibleProvider, type LLMProvider, type TTSProvider, type StorageProvider} from '@motionknowledge/providers';
 import {createLogger, type StructuredLogger} from '@motionknowledge/observability';
 import type {JobQueue} from '@motionknowledge/jobs';
 import {localStorageRoot} from './lib/paths';
@@ -29,7 +29,8 @@ export interface WorkerConfig {
   fps: 30;
   ttsProvider: 'mock' | 'google' | 'elevenlabs';
   ttsVoice: string;
-  llmProvider: 'mock' | 'openai';
+  llmProvider: 'mock' | 'openai' | 'openai-compatible';
+  llmBaseUrl: string;
   llmModel: string;
   sampleRateHz: number;
 }
@@ -59,8 +60,9 @@ export function resolveWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
     fps: 30,
     ttsProvider: (env.TTS_PROVIDER as 'mock' | 'google' | 'elevenlabs' | undefined) ?? 'mock',
     ttsVoice: env.TTS_VOICE ?? 'en-US-Neural2-F',
-    llmProvider: (env.LLM_PROVIDER as 'mock' | 'openai' | undefined) ?? 'mock',
+    llmProvider: (env.LLM_PROVIDER as 'mock' | 'openai' | 'openai-compatible' | undefined) ?? 'mock',
     llmModel: env.LLM_MODEL ?? 'gpt-4o-mini',
+    llmBaseUrl: env.LLM_BASE_URL ?? '',
     sampleRateHz: Number(env.TTS_SAMPLE_RATE ?? 24000),
   };
 }
@@ -73,7 +75,9 @@ export function buildWorkerDeps(env: NodeJS.ProcessEnv): WorkerDeps {
   const logger = createLogger((env.LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error' | undefined) ?? 'info');
 
   let llm: LLMProvider;
-  if (config.llmProvider === 'openai' && env.OPENAI_API_KEY) {
+  if (config.llmProvider === 'openai-compatible' && env.LLM_API_KEY && config.llmBaseUrl) {
+    llm = new OpenAICompatibleProvider({apiKey: env.LLM_API_KEY, baseURL: config.llmBaseUrl, model: config.llmModel});
+  } else if (config.llmProvider === 'openai' && env.OPENAI_API_KEY) {
     llm = new OpenAIProvider({apiKey: env.OPENAI_API_KEY, model: config.llmModel});
   } else {
     llm = new MockProvider();

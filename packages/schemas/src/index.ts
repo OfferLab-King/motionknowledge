@@ -10,3 +10,5 @@ export * from './render';
 export * from './project';
 export * from './state';
 
+
+export * from './json-schema';

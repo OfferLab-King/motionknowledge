@@ -5,4 +5,5 @@ export * from './render';
 export * from './registry';
 export * from './storage';
 export * from './openai';
+export * from './compatible';
 export * from './mock';

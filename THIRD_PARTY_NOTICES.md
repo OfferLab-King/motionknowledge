@@ -38,6 +38,7 @@ license obligations as required by the reuse-first policy (ADR 0005).
 | @playwright/test | 1.62.1 | Apache-2.0 | browser acceptance tests |
 | @dnd-kit/core / @dnd-kit/sortable | 6.3.1 / 10.0.0 | MIT | editor drag-and-drop |
 | tsx | 4.20.6 | MIT | TypeScript execution for CLI scripts |
+| dotenv | 17.4.2 | BSD-2-Clause | environment loading for worker/CLI |
 
 Notices for packages adopted in later tasks are appended as they are added.
 

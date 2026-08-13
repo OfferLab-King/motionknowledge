@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import {zodToJsonSchema} from 'zod-to-json-schema';
+import {toJsonSchema} from '@motionknowledge/schemas';
 import type {z} from 'zod';
 import type {LLMProvider, ProviderResult} from './llm';
 
@@ -8,7 +8,6 @@ export interface OpenAIProviderConfig {
   model: string;
 }
 
-type ZodToJsonSchemaInput = Parameters<typeof zodToJsonSchema>[0];
 
 export class OpenAIProvider implements LLMProvider {
   readonly provider = 'openai';
@@ -28,7 +27,7 @@ export class OpenAIProvider implements LLMProvider {
     idempotencyKey: string;
   }): Promise<ProviderResult<T>> {
     const startedAt = Date.now();
-    const jsonSchema = zodToJsonSchema(input.schema as unknown as ZodToJsonSchemaInput, `output_${input.operation}`);
+    const jsonSchema = toJsonSchema(input.schema);
     const response = await this.client.responses.create({
       model: this.config.model,
       instructions: input.system,
