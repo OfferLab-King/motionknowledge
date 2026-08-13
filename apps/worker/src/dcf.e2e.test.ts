@@ -144,6 +144,8 @@ async function renderApprovedProject(projectId: string) {
 }
 
 beforeAll(async () => {
+  process.env.LLM_PROVIDER = 'mock';
+  process.env.TTS_PROVIDER = 'mock';
   process.env.PREVIEW_WIDTH = '480';
   process.env.PREVIEW_HEIGHT = '270';
   process.env.RENDER_WIDTH = '640';

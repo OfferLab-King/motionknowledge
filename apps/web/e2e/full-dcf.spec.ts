@@ -20,6 +20,8 @@ let boss: Awaited<ReturnType<typeof startBoss>>;
 
 test.beforeAll(async () => {
   test.setTimeout(600_000);
+  process.env.LLM_PROVIDER = 'mock';
+  process.env.TTS_PROVIDER = 'mock';
   process.env.PREVIEW_WIDTH = '320';
   process.env.PREVIEW_HEIGHT = '180';
   process.env.RENDER_WIDTH = '640';
