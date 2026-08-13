@@ -28,17 +28,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Start local Supabase
-        uses: supabase/setup-cli@v1
-        with:
-          version: 2.113.0
-
-      - name: Supabase start
-        run: supabase start
-
-      - name: Run Supabase migrations
-        run: supabase db reset
-
       - name: Lint
         run: pnpm lint
 
