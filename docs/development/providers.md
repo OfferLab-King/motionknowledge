@@ -8,9 +8,16 @@ runs credential-free.
 
 | Variable | Default | Notes |
 | --- | --- | --- |
-| `LLM_PROVIDER` | `mock` | `mock` or `openai` |
-| `OPENAI_API_KEY` | — | required for `openai` |
-| `LLM_MODEL` | `gpt-4o-mini` | used with the OpenAI Responses structured-output API |
+| `LLM_PROVIDER` | `mock` | `mock`, `openai`, or `openai-compatible` |
+| `OPENAI_API_KEY` | — | required for `openai` (Responses structured output) |
+| `LLM_API_KEY` | — | required for `openai-compatible` |
+| `LLM_BASE_URL` | `https://api.deepseek.com` | base URL for `openai-compatible` |
+| `LLM_MODEL` | `gpt-4o-mini` | model id, e.g. `deepseek-chat` for DeepSeek |
+
+`openai-compatible` uses Chat Completions with JSON output, so DeepSeek, Ollama/vLLM gateways, and
+other OpenAI-compatible endpoints work with just `LLM_PROVIDER=openai-compatible`, `LLM_BASE_URL`,
+`LLM_API_KEY`, and `LLM_MODEL`. If the endpoint rejects `response_format`, the adapter falls back
+to a JSON-only prompt.
 
 The mock provider returns deterministic, source-grounded DCF fixtures and records zero cost.
 Source text is always wrapped as untrusted data and cannot modify system instructions.

@@ -8,6 +8,13 @@ export interface ProjectCompositionProps {
   audioUrls?: Record<string, string>;
 }
 
+const TYPED_VISUALS: Record<string, string> = {
+  'title-hero': 'title-hero',
+  'cashflow-timeline': 'cashflow-timeline',
+  formula: 'formula',
+  comparison: 'comparison',
+};
+
 export function SceneRenderer(props: {scene: RenderScene; index: number}) {
   const {scene} = props;
   const definition = useMemo(() => {
@@ -17,7 +24,8 @@ export function SceneRenderer(props: {scene: RenderScene; index: number}) {
       const data = (visual.data ?? {}) as {visualId?: string};
       return data.visualId ? getVisualDefinition(data.visualId) : undefined;
     }
-    return undefined;
+    const typedId = TYPED_VISUALS[visual.type ?? ''];
+    return typedId ? getVisualDefinition(typedId) : undefined;
   }, [scene.visual]);
 
   if (definition) {
@@ -25,13 +33,16 @@ export function SceneRenderer(props: {scene: RenderScene; index: number}) {
     const visual = scene.visual as {type?: string; data?: unknown};
     const raw = (visual.data ?? {}) as {data?: unknown};
     const componentData = raw.data ?? visual.data;
-    return (
-      <Component
-        data={componentData}
-        theme={professionalTheme}
-        durationInFrames={scene.durationInFrames}
-      />
-    );
+    const parsed = definition.propsSchema.safeParse(componentData);
+    if (parsed.success) {
+      return (
+        <Component
+          data={parsed.data}
+          theme={professionalTheme}
+          durationInFrames={scene.durationInFrames}
+        />
+      );
+    }
   }
 
   return (
