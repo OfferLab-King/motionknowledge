@@ -96,6 +96,9 @@ importers:
       '@motionknowledge/storage':
         specifier: workspace:*
         version: link:../../packages/storage
+      '@motionknowledge/tts':
+        specifier: workspace:*
+        version: link:../../packages/tts
       '@motionknowledge/ui':
         specifier: workspace:*
         version: link:../../packages/ui
