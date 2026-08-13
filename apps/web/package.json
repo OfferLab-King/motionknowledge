@@ -35,7 +35,8 @@
     "remotion": "4.0.508",
     "@motionknowledge/storage": "workspace:*",
     "pg-boss": "12.27.0",
-    "@motionknowledge/analytics": "workspace:*"
+    "@motionknowledge/analytics": "workspace:*",
+    "@motionknowledge/tts": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",

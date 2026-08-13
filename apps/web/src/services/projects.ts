@@ -25,6 +25,7 @@ const CreateProjectSchema = z.object({
   tone: z.string().min(2).max(40).default('professional'),
   style: z.string().min(2).max(40).default('professional'),
   aspectRatio: z.enum(['16:9', '9:16']),
+  voice: z.string().min(1).max(80).default('Samantha'),
 });
 
 export interface WorkspaceMembership {
@@ -62,6 +63,7 @@ export async function createProjectAction(formData: FormData): Promise<void> {
     tone: formData.get('tone') ?? 'professional',
     style: formData.get('style') ?? 'professional',
     aspectRatio: formData.get('aspectRatio') ?? '16:9',
+    voice: formData.get('voice') ?? 'Samantha',
   });
   if (!parsed.success) {
     redirect('/projects/new?error=invalid');
@@ -78,6 +80,7 @@ export async function createProjectAction(formData: FormData): Promise<void> {
     tone: parsed.data.tone,
     style: parsed.data.style,
     aspectRatio: parsed.data.aspectRatio,
+    voice: parsed.data.voice,
   });
   await db
     .insert(sources)

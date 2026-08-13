@@ -39,6 +39,8 @@ export async function handleSynthesizeTts(
   const versionRow = versionRows[0];
   if (!versionRow) throw new Error('Scene version missing');
   const scene = SceneV1.parse(versionRow.payload);
+  const projectRow = await deps.db.query.projects.findFirst({where: (t, {eq}) => eq(t.id, payload.projectId)});
+  const projectVoice = (projectRow as {voice?: string} | undefined)?.voice ?? undefined;
 
   const existing = await deps.db
     .select()
@@ -57,6 +59,7 @@ export async function handleSynthesizeTts(
     projectId: payload.projectId,
     workspaceId: payload.workspaceId,
     idempotencyKey: input.envelope.idempotencyKey,
+    voice: projectVoice,
   });
 
   await deps.db.insert(audioAssets).values({

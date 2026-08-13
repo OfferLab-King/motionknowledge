@@ -18,6 +18,7 @@ export const projects = pgTable('projects', {
   targetDurationSeconds: integer('target_duration_seconds').notNull().default(300),
   language: text('language').notNull().default('en'),
   tone: text('tone').notNull().default('professional'),
+  voice: text('voice').notNull().default('Samantha'),
   style: text('style').notNull().default('professional'),
   aspectRatio: text('aspect_ratio').notNull().default('16:9'),
   status: text('status').notNull().default('DRAFT'),

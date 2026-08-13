@@ -27,6 +27,7 @@ export interface NewProject {
   tone?: string;
   style?: string;
   aspectRatio?: string;
+  voice?: string;
 }
 
 export interface ProjectRepository {
@@ -75,6 +76,7 @@ export class ProjectRepositoryImpl implements ProjectRepository {
         tone: input.tone ?? 'professional',
         style: input.style ?? 'professional',
         aspectRatio: input.aspectRatio ?? '16:9',
+        voice: input.voice ?? 'Samantha',
       })
       .returning();
     return rows[0]!;

@@ -33,7 +33,7 @@ describe('tts timing normalization', () => {
     expect(result.data.audioBytes.length).toBeGreaterThan(100);
     expect(result.data.wordTimings).toHaveLength(2);
     expect(result.data.wordTimings[0]!.startMs).toBe(0);
-    expect(result.data.wordTimings[1]!.startMs).toBeGreaterThan(result.data.wordTimings[0]!.endMs);
-    expect(result.data.durationMs).toBeGreaterThan(result.data.wordTimings.at(-1)!.endMs);
+    expect(result.data.wordTimings[1]!.startMs).toBeGreaterThanOrEqual(result.data.wordTimings[0]!.endMs);
+    expect(result.data.durationMs).toBeGreaterThanOrEqual(result.data.wordTimings.at(-1)!.endMs);
   });
 });

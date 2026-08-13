@@ -21,6 +21,7 @@ export class TTSService {
     projectId: string;
     workspaceId: string;
     idempotencyKey: string;
+    voice?: string;
   }): Promise<{
     audioAssetKey: string;
     wordTimings: TTSManifest['scenes'][number]['wordTimings'];
@@ -29,7 +30,7 @@ export class TTSService {
   }> {
     const synthesizeInput: SynthesizeInput = {
       text: input.narration,
-      voice: this.options.voice,
+      voice: input.voice ?? this.options.voice,
       sampleRateHz: this.options.sampleRateHz,
       idempotencyKey: input.idempotencyKey,
     };

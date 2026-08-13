@@ -59,7 +59,7 @@ export function resolveWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
     previewHeight: Number(env.PREVIEW_HEIGHT ?? 360),
     fps: 30,
     ttsProvider: (env.TTS_PROVIDER as 'mock' | 'google' | 'elevenlabs' | undefined) ?? 'mock',
-    ttsVoice: env.TTS_VOICE ?? 'en-US-Neural2-F',
+    ttsVoice: env.TTS_VOICE ?? 'Samantha',
     llmProvider: (env.LLM_PROVIDER as 'mock' | 'openai' | 'openai-compatible' | undefined) ?? 'mock',
     llmModel: env.LLM_MODEL ?? 'gpt-4o-mini',
     llmBaseUrl: env.LLM_BASE_URL ?? '',

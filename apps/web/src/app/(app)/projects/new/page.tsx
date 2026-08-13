@@ -1,7 +1,9 @@
 import {Card, Field, Select, TextInput, Button} from '@motionknowledge/ui';
+import {listMacVoices} from '@motionknowledge/tts';
 import {createProjectAction} from '../../../../services/projects';
 
-export default function NewProjectPage() {
+export default async function NewProjectPage() {
+  const voices = await listMacVoices();
   return (
     <div className="mx-auto max-w-2xl">
       <h1 className="mb-2 text-2xl font-bold text-[#f8fafc]">Create a video</h1>
@@ -50,6 +52,15 @@ export default function NewProjectPage() {
               <Select name="aspectRatio" defaultValue="16:9" aria-label="Aspect ratio">
                 <option value="16:9">16:9</option>
                 <option value="9:16">9:16</option>
+              </Select>
+            </Field>
+            <Field label="Narration voice" hint="Free on-device voices; neural voices appear when Google/ElevenLabs are configured.">
+              <Select name="voice" defaultValue="Samantha" aria-label="Narration voice">
+                {voices.map((voice) => (
+                  <option key={voice.id} value={voice.id}>
+                    {voice.label}
+                  </option>
+                ))}
               </Select>
             </Field>
           </div>

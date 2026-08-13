@@ -1,0 +1,93 @@
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+
+const execFileAsync = promisify(execFile);
+
+export interface VoiceOption {
+  id: string;
+  label: string;
+  provider: 'macos' | 'google' | 'elevenlabs';
+  quality: 'standard' | 'neural' | 'premium';
+}
+
+/** Curated human-sounding macOS voices (classic quality; Enhanced voices are
+ * reported when installed). Excludes novelty/system voices. */
+const MAC_ALLOWLIST = [
+  'Alex',
+  'Samantha',
+  'Samantha (Enhanced)',
+  'Kathy',
+  'Daniel',
+  'Reed (English (US))',
+  'Flo (English (US))',
+  'Eddy (English (US))',
+  'Rocko (English (US))',
+  'Grandma (English (US))',
+  'Grandpa (English (US))',
+  'Junior',
+  'Albert',
+];
+
+export async function listMacVoices(): Promise<VoiceOption[]> {
+  let stdout = '';
+  try {
+    const result = await execFileAsync('say', ['-v', '?'], {timeout: 15_000});
+    stdout = result.stdout;
+  } catch {
+    return [];
+  }
+  const byName = new Map<string, string>();
+  for (const line of stdout.split('\n')) {
+    const match = line.match(/^([A-Za-z][^#]*?)\s+([a-zA-Z_]+)\s+#/);
+    if (match) byName.set(match[1]!.trim(), match[2]!);
+  }
+  const voices: VoiceOption[] = [];
+  for (const name of MAC_ALLOWLIST) {
+    const lang = byName.get(name);
+    if (lang && lang.startsWith('en_')) {
+      voices.push({
+        id: name,
+        label: `${name} (English)`,
+        provider: 'macos',
+        quality: name.includes('Enhanced') ? 'neural' : 'standard',
+      });
+    }
+  }
+  if (voices.length === 0) {
+    voices.push({id: 'Samantha', label: 'Samantha (English)', provider: 'macos', quality: 'standard'});
+  }
+  return voices;
+}
+
+export const GOOGLE_NEURAL_VOICES: VoiceOption[] = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].map(
+  (suffix, index) => ({
+    id: `en-US-Neural2-${suffix}`,
+    label: `Google Neural2 ${['Male', 'Female', 'Female', 'Female', 'Female', 'Male', 'Male', 'Female', 'Male'][index]} (${suffix})`,
+    provider: 'google' as const,
+    quality: 'neural' as const,
+  }),
+);
+
+export const GOOGLE_WAVENET_VOICES: VoiceOption[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map(
+  (suffix, index) => ({
+    id: `en-US-Wavenet-${suffix}`,
+    label: `Google Wavenet ${['Male', 'Male', 'Female', 'Female', 'Female', 'Female', 'Female', 'Female'][index]} (${suffix})`,
+    provider: 'google' as const,
+    quality: 'neural' as const,
+  }),
+);
+
+/** A few well-known ElevenLabs default voices (require ELEVENLABS_API_KEY). */
+export const ELEVENLABS_VOICES: VoiceOption[] = [
+  {id: '21m00Tcm4TlvDq8ikWAM', label: 'Rachel', provider: 'elevenlabs', quality: 'premium'},
+  {id: 'EXAVITQu4vr4xnSDxMaL', label: 'Sarah', provider: 'elevenlabs', quality: 'premium'},
+  {id: 'ErXwobaYiN019PkySvjV', label: 'Antoni', provider: 'elevenlabs', quality: 'premium'},
+  {id: 'onwK4e9ZLuTAKqWW03F9', label: 'Adam', provider: 'elevenlabs', quality: 'premium'},
+  {id: 'pFZP5JQG7iQjIQuC4Bku', label: 'Lily', provider: 'elevenlabs', quality: 'premium'},
+];
+
+export const VOICE_NAME_PATTERN = /^[A-Za-z0-9 ()'-]+$/;
+
+export function isSafeVoiceName(name: string): boolean {
+  return VOICE_NAME_PATTERN.test(name) && name.length <= 80;
+}
