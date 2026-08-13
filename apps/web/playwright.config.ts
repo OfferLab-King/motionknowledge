@@ -21,7 +21,13 @@ export default defineConfig({
   webServer: {
     command: `pnpm exec next dev --port ${port}`,
     url: `http://127.0.0.1:${port}`,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 180_000,
+    env: {
+      ...process.env,
+      BOSS_SCHEMA: 'boss_e2e',
+      LLM_PROVIDER: 'mock',
+      TTS_PROVIDER: 'mock',
+    },
   },
 });

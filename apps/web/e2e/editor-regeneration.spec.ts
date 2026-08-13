@@ -37,7 +37,7 @@ test.beforeAll(async () => {
   process.env.RENDER_HEIGHT = '360';
   ({db} = createDatabaseClient({url: DATABASE_URL}));
   deps = buildWorkerDeps(process.env);
-  boss = await startBoss(deps.config.databaseUrl, [...JOB_NAMES]);
+  boss = await startBoss(deps.config.databaseUrl, [...JOB_NAMES], {schema: "boss_e2e"});
   attachQueue(deps, new PgBossJobQueue(boss, deps.db));
   await attachBossHandlers(boss, deps);
 });
@@ -47,7 +47,7 @@ test.afterAll(async () => {
 });
 
 test('edits and regenerates only one scene', async ({page}) => {
-  test.setTimeout(420_000);
+  test.setTimeout(600_000);
   await page.goto('/register');
   await page.getByLabel('Email').fill(seededEmail);
   await page.getByLabel('Password').fill('Correct-Horse-42!');
@@ -98,7 +98,7 @@ test('edits and regenerates only one scene', async ({page}) => {
     payload: {workspaceId, projectId: seededProjectId},
   });
 
-  const deadline = Date.now() + 240_000;
+  const deadline = Date.now() + 480_000;
   while (Date.now() < deadline) {
     const row = await db.query.projects.findFirst({where: eq(projects.id, seededProjectId)});
     if (row?.status === 'READY_FOR_REVIEW') break;

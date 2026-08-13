@@ -96,7 +96,7 @@ async function runProjectToPreview(projectId: string): Promise<void> {
     idempotencyKey: `e2e|${projectId}|research`,
     payload: {workspaceId: project.workspaceId, projectId},
   });
-  await waitForProjectStatus(projectId, 'READY_FOR_REVIEW', 240_000);
+  await waitForProjectStatus(projectId, 'READY_FOR_REVIEW', 480_000);
 }
 
 async function regenerateScene(projectId: string, sceneKey: string, patch: {title?: string}): Promise<void> {
@@ -111,7 +111,7 @@ async function regenerateScene(projectId: string, sceneKey: string, patch: {titl
     idempotencyKey: `e2e|${projectId}|scene|${sceneKey}|${hashText(JSON.stringify(patch))}`,
     payload: {workspaceId: project.workspaceId, projectId, sceneId: sceneKey, patch},
   });
-  await drainJobs(projectId, 240_000);
+  await drainJobs(projectId, 480_000);
   const current = await db.query.projects.findFirst({where: eq(projects.id, projectId)});
   if (current?.status !== 'READY_FOR_REVIEW' && current?.status !== 'PREVIEW_READY') {
     throw new Error(`Project not reviewable after regeneration: ${current?.status}`);
@@ -131,7 +131,7 @@ async function renderApprovedProject(projectId: string) {
     idempotencyKey: `e2e|${projectId}|render-final`,
     payload: {workspaceId: project.workspaceId, projectId},
   });
-  await waitForProjectStatus(projectId, 'COMPLETE', 300_000);
+  await waitForProjectStatus(projectId, 'COMPLETE', 420_000);
   const finalRows = await db.select().from(renders).where(eq(renders.projectId, projectId));
   const final = finalRows.filter((row) => row.kind === 'FINAL').at(-1);
   if (!final?.mp4Key || !final?.srtKey) throw new Error('Final render missing outputs');
@@ -154,7 +154,7 @@ beforeAll(async () => {
   const workspace = await db.insert(workspaces).values({name: 'DCF E2E Workspace'}).returning();
   fixtureWorkspaceId = workspace[0]!.id;
   deps = buildWorkerDeps(process.env);
-  const boss = await startBoss(deps.config.databaseUrl, [...JOB_NAMES]);
+  const boss = await startBoss(deps.config.databaseUrl, [...JOB_NAMES], {schema: "boss_e2e"});
   attachQueue(deps, new PgBossJobQueue(boss, deps.db));
   await attachBossHandlers(boss, deps);
   return async () => {

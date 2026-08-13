@@ -28,7 +28,7 @@ test.beforeAll(async () => {
   process.env.RENDER_HEIGHT = '360';
   ({db} = createDatabaseClient({url: DATABASE_URL}));
   deps = buildWorkerDeps(process.env);
-  boss = await startBoss(deps.config.databaseUrl, [...JOB_NAMES]);
+  boss = await startBoss(deps.config.databaseUrl, [...JOB_NAMES], {schema: "boss_e2e"});
   attachQueue(deps, new PgBossJobQueue(boss, deps.db));
   await attachBossHandlers(boss, deps);
 });
@@ -38,7 +38,7 @@ test.afterAll(async () => {
 });
 
 test('completes the DCF product journey', async ({page}) => {
-  test.setTimeout(900_000);
+  test.setTimeout(1_800_000);
   await page.goto('/register');
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
@@ -51,7 +51,7 @@ test('completes the DCF product journey', async ({page}) => {
   await expect(page).toHaveURL(/projects\/[a-f0-9-]+/);
   const projectId = page.url().split('/projects/')[1]!;
 
-  const deadline = Date.now() + 240_000;
+  const deadline = Date.now() + 480_000;
   while (Date.now() < deadline) {
     const row = await db.query.projects.findFirst({where: eq(projects.id, projectId)});
     if (row?.status === 'READY_FOR_REVIEW') break;

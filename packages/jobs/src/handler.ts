@@ -51,10 +51,14 @@ export async function executeHandler<T, TResult>(
   });
 }
 
-export async function startBoss(databaseUrl: string, queue: string[]): Promise<PgBoss> {
+export interface StartBossOptions {
+  schema?: string;
+}
+
+export async function startBoss(databaseUrl: string, queue: string[], options: StartBossOptions = {}): Promise<PgBoss> {
   const boss = new PgBoss({
     connectionString: databaseUrl,
-    schema: 'boss',
+    schema: options.schema ?? 'boss',
     maintenanceIntervalSeconds: 60,
     useListenNotify: false,
   });

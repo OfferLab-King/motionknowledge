@@ -36,8 +36,10 @@ Source text is always wrapped as untrusted data and cannot modify system instruc
 
 - Google uses SSML marks to obtain measured word timepoints (economical provider).
 - ElevenLabs uses timestamped synthesis (premium provider).
-- The mock provider synthesizes real short audio per word with FFmpeg, so word timings are always
-  measured, never estimated from text length. Timings are validated for monotonicity.
+- The mock provider synthesizes real speech word-by-word with the macOS `say` synthesizer
+  (Samantha voice) when available, measuring each word's duration from the actual audio — timings
+  are always measured, never estimated from text length, and validated for monotonicity. On
+  platforms without `say` (Linux, CI) it falls back to short sine beeps per word.
 
 ## Storage
 

@@ -9,6 +9,7 @@ export function getBoss(): Promise<PgBoss> {
     bossPromise = startBoss(
       process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54332/postgres',
       [...JOB_NAMES],
+      {schema: process.env.BOSS_SCHEMA ?? 'boss'},
     );
   }
   return bossPromise;
