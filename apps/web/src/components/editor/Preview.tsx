@@ -1,20 +1,15 @@
 'use client';
 
-import {useMemo} from 'react';
 import {Player} from '@remotion/player';
 import {ProjectComposition} from '@motionknowledge/remotion-engine/browser';
 import type {RenderManifest} from '@motionknowledge/schemas';
 
-export function Preview({manifest}: {manifest: RenderManifest | null}) {
-  const audioUrls = useMemo(() => {
-    const map = new Map<string, string>();
-    if (manifest && 'audioUrls' in manifest && manifest.audioUrls) {
-      for (const [key, url] of Object.entries(manifest.audioUrls as Record<string, string | null>)) {
-        if (url) map.set(key, url);
-      }
-    }
-    return map;
-  }, [manifest]);
+export interface PreviewManifest extends RenderManifest {
+  audioUrls?: Record<string, string>;
+}
+
+export function Preview({manifest}: {manifest: PreviewManifest | null}) {
+  const audioUrls = manifest?.audioUrls ?? {};
 
   if (!manifest) {
     return (

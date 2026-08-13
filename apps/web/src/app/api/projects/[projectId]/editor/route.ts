@@ -12,7 +12,7 @@ import {buildRenderManifest} from '@motionknowledge/remotion-engine/manifest';
 import type {TimedWord} from '@motionknowledge/schemas';
 import {CaptionTrackV1} from '@motionknowledge/schemas';
 
-export async function GET(_request: Request, {params}: {params: Promise<{projectId: string}>}) {
+export async function GET(request: Request, {params}: {params: Promise<{projectId: string}>}) {
   const {projectId} = await params;
   const user = await getSessionUser();
   if (!user) return NextResponse.json({error: 'unauthorized'}, {status: 401});

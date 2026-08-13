@@ -1,7 +1,53 @@
-import {getVisualDefinition, professionalTheme, type VisualComponentProps} from '@motionknowledge/visual-library';
+import {getVisualDefinition, professionalTheme} from '@motionknowledge/visual-library';
 import {AbsoluteFill, Audio, Sequence} from 'remotion';
 import type {RenderManifest, RenderScene} from '@motionknowledge/schemas';
-import {useMemo} from 'react';
+import {useEffect, useMemo, useState} from 'react';
+
+/**
+ * Fetches the narration for the browser player and exposes it as a blob: URL.
+ * Remotion's Player requires audio sources it can register; fetching with
+ * same-origin credentials sidesteps cookie/cross-origin issues (e.g. when the
+ * page is served on 127.0.0.1 but URLs carry localhost) and guarantees the
+ * media is playable. The worker render path never mounts audio (narration is
+ * mixed in post-production), so this only runs inside the Player.
+ */
+function useAudioObjectUrl(src: string | undefined): string | undefined {
+  const [url, setUrl] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl: string | undefined;
+    if (!src) {
+      setUrl(undefined);
+      return;
+    }
+    fetch(src, {credentials: 'same-origin'})
+      .then((response) => (response.ok ? response.blob() : Promise.reject(new Error(`audio fetch failed: ${response.status}`))))
+      .then((blob) => {
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        setUrl(objectUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setUrl(undefined);
+      });
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [src]);
+  return url;
+}
+
+function SceneWithAudio(props: {audioUrl: string | undefined; children: React.ReactNode}) {
+  const audioSrc = useAudioObjectUrl(props.audioUrl);
+  if (!audioSrc) return <>{props.children}</>;
+  return (
+    <>
+      <Audio src={audioSrc} />
+      {props.children}
+    </>
+  );
+}
 
 export interface ProjectCompositionProps {
   manifest?: RenderManifest | null;
@@ -69,10 +115,9 @@ export function ProjectComposition(props: ProjectCompositionProps) {
     <AbsoluteFill style={{backgroundColor: manifest.theme.background}}>
       {manifest.scenes.map((scene: RenderScene, index: number) => (
         <Sequence key={scene.sceneVersionId} from={scene.startFrame} durationInFrames={scene.durationInFrames} premountFor={30}>
-          {scene.narrationAudioKey && props.audioUrls?.[scene.narrationAudioKey] ? (
-            <Audio src={props.audioUrls[scene.narrationAudioKey]} />
-          ) : null}
-          <SceneRenderer scene={scene} index={index} />
+          <SceneWithAudio audioUrl={scene.narrationAudioKey ? props.audioUrls?.[scene.narrationAudioKey] : undefined}>
+            <SceneRenderer scene={scene} index={index} />
+          </SceneWithAudio>
         </Sequence>
       ))}
     </AbsoluteFill>
