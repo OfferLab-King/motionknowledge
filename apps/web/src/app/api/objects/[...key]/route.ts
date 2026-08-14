@@ -1,7 +1,7 @@
 import {NextResponse} from 'next/server';
 import {getSessionUser} from '../../../../lib/supabase/auth';
 import {getServiceDb} from '../../../../lib/db';
-import {getWorkspaceMemberships} from '../../../../services/projects';
+import {getWorkspaceMemberships, resolveWorkspaceId} from '../../../../services/projects';
 import {createStorageProvider, localStorageRoot} from '@motionknowledge/storage';
 import {verifyObjectSignature} from '../../../../services/downloads';
 

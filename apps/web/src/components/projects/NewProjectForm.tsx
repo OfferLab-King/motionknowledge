@@ -9,6 +9,7 @@ import {createProjectAction} from '../../services/projects';
 export function NewProjectForm(props: {
   voices: Array<{id: string; label: string}>;
   formats: Array<{id: string; name: string; description: string}>;
+  languages: Array<{code: string; name: string}>;
 }) {
   const [templateChoice, setTemplateChoice] = useState<{templateId: string | null; styleId: string; format: string}>({
     templateId: 'modern-explainer',
@@ -110,7 +111,13 @@ export function NewProjectForm(props: {
               </Select>
             </Field>
             <Field label="Language">
-              <TextInput name="language" defaultValue="en" aria-label="Language" />
+              <Select name="language" defaultValue="en" aria-label="Language">
+                {props.languages.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.name}
+                  </option>
+                ))}
+              </Select>
             </Field>
             <Field label="Tone">
               <Select name="tone" defaultValue="professional" aria-label="Tone">

@@ -2,7 +2,7 @@ import {NextResponse} from 'next/server';
 import {z} from 'zod';
 import {getSessionUser} from '../../../../../../lib/supabase/auth';
 import {getServiceDb} from '../../../../../../lib/db';
-import {getWorkspaceMemberships} from '../../../../../../services/projects';
+import {getWorkspaceMemberships, resolveWorkspaceId} from '../../../../../../services/projects';
 import {applySceneEdit, deleteScene} from '../../../../../../services/artifacts';
 import {StyleOverrideSchema} from '@motionknowledge/schemas';
 import {enqueueSceneNarration} from '../../../../../../services/scenes';
@@ -32,8 +32,7 @@ export async function PATCH(request: Request, {params}: {params: Promise<{projec
     return NextResponse.json({error: 'unknown visual'}, {status: 400});
   }
   const db = getServiceDb();
-  const memberships = await getWorkspaceMemberships(user.id, db);
-  const workspaceId = memberships[0]?.workspaceId;
+  const workspaceId = await resolveWorkspaceId(db, user.id);
   if (!workspaceId) return NextResponse.json({error: 'no workspace'}, {status: 403});
   const project = await db.query.projects.findFirst({where: (t, {eq}) => eq(t.id, projectId)});
   if (!project || String(project.workspaceId) !== workspaceId) {
@@ -95,8 +94,7 @@ export async function DELETE(_request: Request, {params}: {params: Promise<{proj
   const user = await getSessionUser();
   if (!user) return NextResponse.json({error: 'unauthorized'}, {status: 401});
   const db = getServiceDb();
-  const memberships = await getWorkspaceMemberships(user.id, db);
-  const workspaceId = memberships[0]?.workspaceId;
+  const workspaceId = await resolveWorkspaceId(db, user.id);
   if (!workspaceId) return NextResponse.json({error: 'no workspace'}, {status: 403});
   const project = await db.query.projects.findFirst({where: (t, {eq}) => eq(t.id, projectId)});
   if (!project || String(project.workspaceId) !== workspaceId) {

@@ -114,6 +114,9 @@ importers:
       '@motionknowledge/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@motionknowledge/usage':
+        specifier: workspace:*
+        version: link:../../packages/usage
       '@motionknowledge/visual-library':
         specifier: workspace:*
         version: link:../../packages/visual-library

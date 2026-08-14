@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./formats": "./src/formats.ts",
-    "./templates": "./src/templates.ts"
+    "./templates": "./src/templates.ts",
+    "./languages": "./src/languages.ts"
   },
   "scripts": {
     "lint": "echo 'no lint configured'",

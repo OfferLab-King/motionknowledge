@@ -165,6 +165,78 @@ function pipelineWithBrokenModel() {
   });
 }
 
+describe('language threading', () => {
+  it('passes the language into the storyboard prompt', async () => {
+    let capturedPrompt = '';
+    const pipeline = new ContentPipeline({
+      llm: {
+        provider: 'stub',
+        model: 'stub',
+        async generateStructured<T>(input: Parameters<LLMProvider['generateStructured']>[0]) {
+          capturedPrompt = input.prompt;
+          return {
+            data: {
+              schemaVersion: 1,
+              id: 'sb-lang',
+              scenes: [
+                {
+                  schemaVersion: 1,
+                  id: 'scene-a',
+                  sceneVersionId: 'scene-a-v1',
+                  index: 0,
+                  title: 'Intro',
+                  narration: 'Hola.',
+                  durationSeconds: 10,
+                  claimIds: ['claim-dcf-definition'],
+                  chapterId: 'chapter-1',
+                  visual: {type: 'title-hero', schemaVersion: 1, intent: 'introduce', data: {title: 'X'}},
+                  provider: {provider: 'stub', model: 'stub', costUsd: '0', durationMs: 0},
+                  inputHash: 'a'.repeat(64),
+                },
+              ],
+            },
+            raw: {},
+            provider: 'stub',
+            model: 'stub',
+            usage: {inputUnits: '0', outputUnits: '0', providerCostUsd: '0', computeDurationMs: 1},
+          } as ProviderResult<T>;
+        },
+      },
+    });
+    await pipeline.generateStoryboard(
+      {
+        script: {
+          schemaVersion: 1,
+          id: 'script-lang',
+          title: 'DCF',
+          language: 'es',
+          tone: 'professional',
+          chapters: [{id: 'chapter-1', title: 'Intro', sectionId: 'sec-1', segments: [{id: 's1', chapterId: 'chapter-1', sectionId: 'sec-1', text: 'Hola', claimIds: ['claim-dcf-definition']}]}],
+        },
+        lessonPlan: LessonPlanV1.parse({
+          schemaVersion: 1,
+          id: 'lesson-lang',
+          title: 'DCF',
+          audienceLevel: 'beginner',
+          targetDurationSeconds: 300,
+          learningObjectives: [{id: 'obj-1', text: 'Explain DCF'}],
+          sections: [{id: 'sec-1', title: 'Intro', objectiveIds: ['obj-1'], claimIds: ['claim-dcf-definition'], prereqSectionIds: [], durationSeconds: 60}],
+          language: 'es',
+          tone: 'professional',
+        }),
+        claims,
+        aspectRatio: '16:9',
+        format: 'explainer',
+        templateId: null,
+        styleId: 'signature',
+        language: 'es',
+      },
+      {},
+    );
+    expect(capturedPrompt).toContain('Language: es');
+  });
+});
+
 describe('storyboard claim provenance repair', () => {
   it('derives claim provenance from the script chapter when the model omits claimIds', async () => {
     const pipeline = new ContentPipeline({

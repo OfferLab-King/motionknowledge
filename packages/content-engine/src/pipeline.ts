@@ -60,6 +60,7 @@ export class ContentPipeline {
       format: string;
       templateId: string | null;
       styleId: string;
+      language?: string;
     },
     context: PipelineContext,
   ): Promise<Storyboard> {

@@ -29,6 +29,7 @@
     "@motionknowledge/storage": "workspace:*",
     "@motionknowledge/tts": "workspace:*",
     "@motionknowledge/ui": "workspace:*",
+    "@motionknowledge/usage": "workspace:*",
     "@motionknowledge/visual-library": "workspace:*",
     "@motionknowledge/visual-router": "workspace:*",
     "@remotion/player": "4.0.508",

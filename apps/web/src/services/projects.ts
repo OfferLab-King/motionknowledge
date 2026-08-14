@@ -2,7 +2,7 @@
 
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
-import {eq} from 'drizzle-orm';
+import {and, eq} from 'drizzle-orm';
 import {
   workspaces,
   workspaceMemberships,
@@ -19,12 +19,13 @@ import {track} from '@motionknowledge/analytics';
 import {isRegisteredStyle, getStyleDefinition} from '@motionknowledge/visual-library/style';
 import {isRegisteredTemplate} from '@motionknowledge/content-engine/templates';
 import {isRegisteredFormat} from '@motionknowledge/content-engine/formats';
+import {isSupportedLanguage} from '@motionknowledge/content-engine/languages';
 
 const CreateProjectSchema = z.object({
   title: z.string().min(3, 'Topic must be at least 3 characters').max(200),
   audienceLevel: z.enum(['beginner', 'intermediate', 'advanced']),
   targetDurationMinutes: z.enum(['3', '5', '10']),
-  language: z.string().min(2).max(8).default('en'),
+  language: z.string().min(2).max(8).default('en').refine(isSupportedLanguage, 'Unsupported language'),
   tone: z.string().min(2).max(40).default('professional'),
   aspectRatio: z.enum(['16:9', '9:16']),
   voice: z.string().min(1).max(80).default('Samantha'),
@@ -55,7 +56,13 @@ export async function ensureWorkspaceForUser(userId: string, db: Database): Prom
   const workspace = await db.insert(workspaces).values({name: 'My workspace'}).returning();
   await db.insert(workspaceMemberships).values({workspaceId: workspace[0]!.id, userId, role: 'owner'});
   await db.insert(subscriptions).values({workspaceId: workspace[0]!.id, status: 'free', plan: 'free'}).onConflictDoNothing();
+  await grantFreeCredits(workspace[0]!.id, db);
   return {workspaceId: workspace[0]!.id, role: 'owner'};
+}
+
+export async function grantFreeCredits(workspaceId: string, db: Database): Promise<void> {
+  const {UsageLedgerImpl, FREE_CREDITS} = await import('@motionknowledge/usage');
+  await new UsageLedgerImpl(db).grantCredits(workspaceId, FREE_CREDITS, 'Free tier allocation');
 }
 
 export async function createProjectAction(formData: FormData): Promise<void> {
@@ -414,4 +421,82 @@ export async function setBurnedCaptionsAction(projectId: string, burnedCaptions:
   if (!project || String(project.workspaceId) !== workspaceId) throw new Error('Project not found');
   await db.update(projectsTable).set({burnedCaptions}).where(eq(projectsTable.id, projectId));
   revalidatePath(`/projects/${projectId}`);
+}
+
+/**
+ * Resolve the active workspace for a user: the cookie-selected workspace when
+ * valid, otherwise the first membership (backwards compatible).
+ */
+export async function resolveWorkspaceId(db: Database, userId: string): Promise<string | null> {
+  const memberships = await getWorkspaceMemberships(userId, db);
+  if (memberships.length === 0) return null;
+  const {cookies} = await import('next/headers');
+  const selected = (await cookies()).get('mk_workspace')?.value;
+  return memberships.find((membership) => membership.workspaceId === selected)?.workspaceId ?? memberships[0]!.workspaceId;
+}
+
+/** Switch the active workspace for the session. */
+export async function setActiveWorkspaceAction(workspaceId: string): Promise<void> {
+  const user = await getSessionUser();
+  if (!user) redirect('/login');
+  const db = getServiceDb();
+  const memberships = await getWorkspaceMemberships(user.id, db);
+  if (!memberships.some((membership) => membership.workspaceId === workspaceId)) throw new Error('Not a member of that workspace');
+  const {cookies} = await import('next/headers');
+  (await cookies()).set('mk_workspace', workspaceId, {path: '/', maxAge: 60 * 60 * 24 * 365});
+  revalidatePath('/', 'layout');
+}
+
+/** Create a new workspace and switch to it. */
+export async function createWorkspaceAction(name: string): Promise<void> {
+  const user = await getSessionUser();
+  if (!user) redirect('/login');
+  const clean = name.trim();
+  if (clean.length < 3 || clean.length > 60) throw new Error('Workspace name must be 3–60 characters');
+  const db = getServiceDb();
+  const workspace = await db.insert(workspaces).values({name: clean}).returning();
+  const workspaceId = workspace[0]!.id;
+  await db.insert(workspaceMemberships).values({workspaceId, userId: user.id, role: 'owner'});
+  await db.insert(subscriptions).values({workspaceId, status: 'free', plan: 'free'}).onConflictDoNothing();
+  await grantFreeCredits(workspaceId, db);
+  const {cookies} = await import('next/headers');
+  (await cookies()).set('mk_workspace', workspaceId, {path: '/', maxAge: 60 * 60 * 24 * 365});
+  revalidatePath('/', 'layout');
+}
+
+/** Invite a user (by email) to a workspace as an editor. */
+export async function inviteToWorkspaceAction(workspaceId: string, email: string): Promise<void> {
+  const user = await getSessionUser();
+  if (!user) redirect('/login');
+  const db = getServiceDb();
+  const memberships = await getWorkspaceMemberships(user.id, db);
+  const membership = memberships.find((item) => item.workspaceId === workspaceId);
+  if (!membership) throw new Error('Not a member of that workspace');
+  if (membership.role !== 'owner') throw new Error('Only owners can invite');
+  const clean = email.trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clean)) throw new Error('Invalid email');
+  const {sql} = await import('drizzle-orm');
+  const rows = await db.execute(sql.raw(`select id from auth.users where email = '${clean.replace(/'/g, "''")}' limit 1`));
+  const target = rows[0] as {id?: string} | undefined;
+  if (!target?.id) throw new Error('No account with that email');
+  await db
+    .insert(workspaceMemberships)
+    .values({workspaceId, userId: target.id, role: 'editor'})
+    .onConflictDoNothing();
+  revalidatePath('/', 'layout');
+}
+
+/** Remove a member from a workspace. */
+export async function removeMemberAction(workspaceId: string, userId: string): Promise<void> {
+  const user = await getSessionUser();
+  if (!user) redirect('/login');
+  if (userId === user.id) throw new Error('Owners cannot remove themselves');
+  const db = getServiceDb();
+  const memberships = await getWorkspaceMemberships(user.id, db);
+  const membership = memberships.find((item) => item.workspaceId === workspaceId);
+  if (!membership || membership.role !== 'owner') throw new Error('Only owners can remove members');
+  await db
+    .delete(workspaceMemberships)
+    .where(and(eq(workspaceMemberships.workspaceId, workspaceId), eq(workspaceMemberships.userId, userId)));
+  revalidatePath('/', 'layout');
 }

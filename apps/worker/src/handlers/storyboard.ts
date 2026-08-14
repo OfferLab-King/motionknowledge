@@ -41,6 +41,7 @@ export async function handleGenerateStoryboard(
       format: project.format ?? 'explainer',
       templateId: project.templateId ?? null,
       styleId: project.styleId ?? 'signature',
+      language: project.language ?? 'en',
     },
     {workspaceId: payload.workspaceId, projectId: payload.projectId, correlationId: input.envelope.idempotencyKey},
   );

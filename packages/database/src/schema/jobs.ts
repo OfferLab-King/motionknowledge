@@ -72,3 +72,14 @@ export const renders = pgTable('renders', {
   createdAt: timestamp('created_at', {withTimezone: true}).notNull().defaultNow(),
   completedAt: timestamp('completed_at', {withTimezone: true}),
 });
+
+export const projectShareTokens = pgTable('project_share_tokens', {
+  token: text('token').primaryKey(),
+  projectId: uuid('project_id')
+    .notNull()
+    .references(() => projects.id, {onDelete: 'cascade'}),
+  workspaceId: uuid('workspace_id')
+    .notNull()
+    .references(() => workspaces.id, {onDelete: 'cascade'}),
+  createdAt: timestamp('created_at', {withTimezone: true}).notNull().defaultNow(),
+});

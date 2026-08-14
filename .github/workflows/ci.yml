@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Secret scan
+        run: pnpm exec tsx scripts/scan-secrets.ts
+
       - name: Lint
         run: pnpm lint
 
@@ -64,6 +67,9 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Secret scan
+        run: pnpm exec tsx scripts/scan-secrets.ts
       - name: Start local Supabase
         uses: supabase/setup-cli@v1
         with:

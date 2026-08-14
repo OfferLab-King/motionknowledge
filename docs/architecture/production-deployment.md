@@ -120,3 +120,22 @@ The first commercial release is implemented and verified locally against these c
 
 Local development runs entirely on deterministic mock providers; paid providers activate only when
 their environment variables are present (see `docs/development/providers.md`).
+
+## Phase 11 additions
+
+- **Health endpoint**: `GET /api/health` (DB ping + version) for load balancer
+  and monitoring probes.
+- **Credits**: a workspace credit ledger (grants/consumes) is charged by every
+  paid operation (LLM, TTS, renders, HyperFrames); free workspaces start with
+  5,000 credits; the final-render API enforces a minimum balance (402);
+  operators grant credits with `scripts/grant-credits.ts`. Payment-provider
+  integration (Stripe) only needs to replace the grant path.
+- **Share links**: read-only, token-based export shares (`/share/[token]`) with
+  short-lived signed URLs.
+- **Workspaces**: multi-workspace support with a session cookie-selected active
+  workspace, invite-by-email members, and owner-managed membership.
+- **Secret scan**: `scripts/scan-secrets.ts` runs in CI and fails on common
+  credential patterns.
+- **Render scaling**: render concurrency is capped at `min(4, cores)` per
+  worker; moving renders to Remotion Lambda only requires replacing the
+  `renderProject` implementation behind the same manifest contract.

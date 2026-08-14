@@ -1,7 +1,7 @@
 import {NextResponse} from 'next/server';
 import {getSessionUser} from '../../../../../../lib/supabase/auth';
 import {getServiceDb} from '../../../../../../lib/db';
-import {getWorkspaceMemberships} from '../../../../../../services/projects';
+import {getWorkspaceMemberships, resolveWorkspaceId} from '../../../../../../services/projects';
 import {resolveRenderDownload, signObjectUrl} from '../../../../../../services/downloads';
 import {trackExportDownload} from '../../../../../../services/analytics-helpers';
 
@@ -15,8 +15,7 @@ export async function GET(_request: Request, {params}: {params: Promise<{project
     return NextResponse.json({error: 'invalid file kind'}, {status: 400});
   }
   const db = getServiceDb();
-  const memberships = await getWorkspaceMemberships(user.id, db);
-  const workspaceId = memberships[0]?.workspaceId;
+  const workspaceId = await resolveWorkspaceId(db, user.id);
   if (!workspaceId) return NextResponse.json({error: 'no workspace'}, {status: 403});
   const download = await resolveRenderDownload(db, {projectId, renderId, workspaceId, kind});
   if (!download || !download.objectKey) {

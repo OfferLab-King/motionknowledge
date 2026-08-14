@@ -21,6 +21,7 @@ export interface GenerateStoryboardInput {
   format: string;
   templateId: string | null;
   styleId: string;
+  language?: string;
 }
 
 export async function generateStoryboard(
@@ -41,6 +42,7 @@ export async function generateStoryboard(
     prompt: wrapUntrusted(
       [
         `Aspect ratio: ${input.aspectRatio}`,
+        `Language: ${input.language ?? 'en'}`,
         visualStyleForPrompt(style.id, style.name, style.description),
         formatGrammarForPrompt(input.format),
         templateGuidanceForPrompt(template?.id ?? null, template?.name ?? null, template?.scenePlanningGuidance ?? ''),

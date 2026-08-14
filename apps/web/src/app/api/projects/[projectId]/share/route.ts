@@ -1,30 +1,23 @@
 import {NextResponse} from 'next/server';
+import {randomBytes} from 'node:crypto';
 import {getSessionUser} from '../../../../../lib/supabase/auth';
 import {getServiceDb} from '../../../../../lib/db';
-import {ensureWorkspaceForUser, getWorkspaceMemberships, resolveWorkspaceId} from '../../../../../services/projects';
-import {listJobs} from '../../../../../services/artifacts';
+import {resolveWorkspaceId} from '../../../../../services/projects';
+import {projectShareTokens} from '@motionknowledge/database';
+import {eq} from 'drizzle-orm';
 
-export async function GET(_request: Request, {params}: {params: Promise<{projectId: string}>}) {
+export async function POST(_request: Request, {params}: {params: Promise<{projectId: string}>}) {
   const {projectId} = await params;
   const user = await getSessionUser();
   if (!user) return NextResponse.json({error: 'unauthorized'}, {status: 401});
   const db = getServiceDb();
   const workspaceId = await resolveWorkspaceId(db, user.id);
   if (!workspaceId) return NextResponse.json({error: 'no workspace'}, {status: 403});
-  const jobs = await listJobs(db, projectId);
-  const authorized = jobs.length === 0 ? false : true;
-  void authorized;
   const project = await db.query.projects.findFirst({where: (t, {eq}) => eq(t.id, projectId)});
   if (!project || String(project.workspaceId) !== workspaceId) {
     return NextResponse.json({error: 'not found'}, {status: 404});
   }
-  return NextResponse.json({jobs: jobs.map((job) => ({
-    id: job.id,
-    operation: job.operation,
-    status: job.status,
-    attempt: job.attempt,
-    errorCode: job.errorCode,
-    safeError: job.safeError,
-    createdAt: job.createdAt,
-  }))});
+  const token = randomBytes(18).toString('hex');
+  await db.insert(projectShareTokens).values({token, projectId, workspaceId}).onConflictDoNothing();
+  return NextResponse.json({token, url: `/share/${token}`});
 }

@@ -2,7 +2,7 @@ import {NextResponse} from 'next/server';
 import {z} from 'zod';
 import {getSessionUser} from '../../../../../../../lib/supabase/auth';
 import {getServiceDb} from '../../../../../../../lib/db';
-import {getWorkspaceMemberships} from '../../../../../../../services/projects';
+import {getWorkspaceMemberships, resolveWorkspaceId} from '../../../../../../../services/projects';
 import {enqueueSceneRegeneration} from '../../../../../../../services/scenes';
 import {track} from '@motionknowledge/analytics';
 
@@ -20,8 +20,7 @@ export async function POST(request: Request, {params}: {params: Promise<{project
   const parsed = RegenerateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({error: 'invalid input'}, {status: 400});
   const db = getServiceDb();
-  const memberships = await getWorkspaceMemberships(user.id, db);
-  const workspaceId = memberships[0]?.workspaceId;
+  const workspaceId = await resolveWorkspaceId(db, user.id);
   if (!workspaceId) return NextResponse.json({error: 'no workspace'}, {status: 403});
   const project = await db.query.projects.findFirst({where: (t, {eq}) => eq(t.id, projectId)});
   if (!project || String(project.workspaceId) !== workspaceId) {

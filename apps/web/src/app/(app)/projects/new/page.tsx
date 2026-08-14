@@ -1,6 +1,7 @@
 import {Card, Field, Select, TextInput, Button} from '@motionknowledge/ui';
 import {listMacVoices} from '@motionknowledge/tts';
 import {listFormats} from '@motionknowledge/content-engine/formats';
+import {SUPPORTED_LANGUAGES} from '@motionknowledge/content-engine/languages';
 import {createProjectAction} from '../../../../services/projects';
 import {NewProjectForm} from '../../../../components/projects/NewProjectForm';
 
@@ -17,6 +18,7 @@ export default async function NewProjectPage() {
       <NewProjectForm
         voices={voices.map((voice) => ({id: voice.id, label: voice.label}))}
         formats={formats.map((format) => ({id: format.id, name: format.name, description: format.description}))}
+        languages={SUPPORTED_LANGUAGES.map((lang) => ({code: lang.code, name: lang.name}))}
       />
     </div>
   );

@@ -5,4 +5,5 @@ export * from './storyboard';
 export * from './metadata';
 export * from './pipeline';
 export * from './formats';
+export * from './languages';
 export * from './templates';

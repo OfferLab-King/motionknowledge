@@ -29,6 +29,7 @@ export function ExportPanel(props: {
   const [renders, setRenders] = useState<ExportView[]>(props.initialRenders);
   const [projectStatus, setProjectStatus] = useState(props.projectStatus);
   const [busy, setBusy] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   async function refresh() {
     const response = await fetch(`/api/projects/${projectId}/exports`, {cache: 'no-store'});
@@ -60,6 +61,14 @@ export function ExportPanel(props: {
   async function cancelRender(renderId: string) {
     await fetch(`/api/projects/${projectId}/renders/${renderId}/cancel`, {method: 'POST'});
     await refresh();
+  }
+
+  async function createShareLink() {
+    const response = await fetch(`/api/projects/${projectId}/share`, {method: 'POST'});
+    if (response.ok) {
+      const data = (await response.json()) as {url?: string};
+      if (data.url) setShareUrl(`${window.location.origin}${data.url}`);
+    }
   }
 
   const renderable = projectStatus === 'READY_FOR_REVIEW' || projectStatus === 'APPROVED';
@@ -104,7 +113,7 @@ export function ExportPanel(props: {
               {complete.width && complete.height ? `${complete.width}x${complete.height}` : ''}
             </span>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {complete.files.map((file) => (
               <a
                 key={file.kind}
@@ -115,7 +124,25 @@ export function ExportPanel(props: {
                 Download {file.label}
               </a>
             ))}
+            <button
+              type="button"
+              onClick={() => void createShareLink()}
+              className="rounded-lg border border-[#2a4568] bg-[#10213a] px-4 py-2 text-sm font-semibold text-[#59d5e0] hover:bg-[#1a3050]"
+            >
+              Create share link
+            </button>
           </div>
+          {shareUrl ? (
+            <div className="mt-3 flex items-center gap-2">
+              <input
+                readOnly
+                value={shareUrl}
+                aria-label="Share link"
+                onFocus={(event) => event.target.select()}
+                className="w-full rounded-lg border border-[#2a4568] bg-[#10213a] px-3 py-2 text-xs text-[#f8fafc] outline-none"
+              />
+            </div>
+          ) : null}
         </div>
       ) : (
         <p className="text-sm text-[#9fb2c8]">
