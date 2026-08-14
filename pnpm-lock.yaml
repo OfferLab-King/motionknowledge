@@ -81,15 +81,24 @@ importers:
       '@motionknowledge/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@motionknowledge/content-engine':
+        specifier: workspace:*
+        version: link:../../packages/content-engine
       '@motionknowledge/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@motionknowledge/hyperframes-adapter':
+        specifier: workspace:*
+        version: link:../../packages/hyperframes-adapter
       '@motionknowledge/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
       '@motionknowledge/remotion-engine':
         specifier: workspace:*
         version: link:../../packages/remotion-engine
+      '@motionknowledge/research':
+        specifier: workspace:*
+        version: link:../../packages/research
       '@motionknowledge/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
@@ -105,6 +114,9 @@ importers:
       '@motionknowledge/visual-library':
         specifier: workspace:*
         version: link:../../packages/visual-library
+      '@motionknowledge/visual-router':
+        specifier: workspace:*
+        version: link:../../packages/visual-router
       '@remotion/player':
         specifier: 4.0.508
         version: 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -184,6 +196,9 @@ importers:
       '@motionknowledge/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@motionknowledge/hyperframes-adapter':
+        specifier: workspace:*
+        version: link:../../packages/hyperframes-adapter
       '@motionknowledge/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
@@ -691,6 +706,9 @@ importers:
 
   packages/visual-library:
     dependencies:
+      '@motionknowledge/schemas':
+        specifier: workspace:*
+        version: link:../schemas
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -710,6 +728,9 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.14)
+      react-dom:
+        specifier: 19.2.8
+        version: 19.2.8(react@19.2.8)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -2589,6 +2610,7 @@ packages:
   '@xmldom/xmldom@0.9.10':
     resolution: {integrity: sha512-A9gOqLdi6cV4ibazAjcQufGj0B1y/vDqYrcuP6d/6x8P27gRS8643Dj9o1dEKtB6O7fwxb2FgBmJS2mX7gpvdw==}
     engines: {node: '>=14.6'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}

@@ -1,16 +1,6 @@
 import {z} from 'zod';
 
-export const ThemeTokenSchema = z.object({
-  background: z.string(),
-  surface: z.string(),
-  primary: z.string(),
-  accent: z.string(),
-  text: z.string(),
-  muted: z.string(),
-  danger: z.string(),
-  safeAreaX: z.number(),
-  safeAreaY: z.number(),
-});
+export {ThemeTokenSchema} from './style';
 
 const TitleHeroDataV1 = z.object({
   title: z.string().min(1),

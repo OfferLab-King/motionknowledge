@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {ThemeTokenSchema} from './visual';
+import {ThemeTokenSchema, StyleIdentitySchema, StyleOverrideSchema} from './style';
 import {Sha256Schema} from './common';
 
 export const RenderSceneV1 = z.object({
@@ -20,6 +20,7 @@ export const RenderSceneV1 = z.object({
     }),
   ).default([]),
   visual: z.unknown(),
+  styleOverride: StyleOverrideSchema.default({}),
   inputHash: z.string().regex(/^[a-f0-9]{64}$/),
 });
 
@@ -33,6 +34,7 @@ export const RenderManifestV1 = z.object({
   fps: z.literal(30),
   totalDurationInFrames: z.number().int().positive(),
   theme: ThemeTokenSchema,
+  style: StyleIdentitySchema.default({styleId: 'signature', styleVersion: 1}),
   scenes: z.array(RenderSceneV1).min(1),
   audioTracks: z.array(
     z.object({

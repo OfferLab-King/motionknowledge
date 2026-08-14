@@ -233,6 +233,7 @@ export const visualRegistry: Readonly<Record<string, VisualDefinition<unknown>>>
     schemaVersion: 1,
     engine: 'remotion',
     preview: 'fixture:process-flow',
+    variants: ['polished', 'hand-drawn', 'structured', 'infographic', 'business', 'minimal'],
     propsSchema: ProcessFlowProps,
     component: ProcessFlow,
   },

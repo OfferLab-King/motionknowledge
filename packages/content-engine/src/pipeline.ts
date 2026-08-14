@@ -28,6 +28,7 @@ export class ContentPipeline {
       audienceLevel: 'beginner' | 'intermediate' | 'advanced';
       language: string;
       tone: string;
+      format?: string;
     },
     context: PipelineContext,
   ): Promise<LessonPlan> {
@@ -56,7 +57,9 @@ export class ContentPipeline {
       lessonPlan: LessonPlan;
       claims: ResearchClaim[];
       aspectRatio: '16:9' | '9:16';
-      style: string;
+      format: string;
+      templateId: string | null;
+      styleId: string;
     },
     context: PipelineContext,
   ): Promise<Storyboard> {

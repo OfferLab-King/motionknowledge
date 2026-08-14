@@ -32,6 +32,8 @@ export async function handleGeneratePreview(
     width: deps.config.previewWidth,
     height: deps.config.previewHeight,
     fps: deps.config.fps,
+    styleId: project.styleId ?? 'signature',
+    styleVersion: project.styleVersion ?? 1,
   });
   RenderManifestV1.parse(manifest);
 
@@ -48,7 +50,26 @@ export async function handleGeneratePreview(
 
   const scratch = await mkdtemp(join(tmpdir(), 'mk-preview-'));
   const outputPath = join(scratch, 'preview.mp4');
-  const output = await renderProject(manifest, outputPath);
+  const renderRow = (
+    await deps.db
+      .insert(renders)
+      .values({
+        workspaceId: payload.workspaceId,
+        projectId: payload.projectId,
+        kind: 'PREVIEW',
+        status: 'rendering',
+        progress: 0,
+        providerCostUsd: '0',
+      })
+      .returning()
+  )[0]!;
+  let lastReported = -1;
+  const output = await renderProject(manifest, outputPath, (progress) => {
+    if (progress - lastReported >= 5 || progress >= 100) {
+      lastReported = progress;
+      void deps.db.update(renders).set({progress}).where(eq(renders.id, renderRow.id));
+    }
+  });
   const {attachNarration} = await import('../lib/narration');
   const finalPath = join(scratch, 'preview-narrated.mp4');
   await attachNarration(deps, manifest, outputPath, finalPath);
@@ -58,22 +79,19 @@ export async function handleGeneratePreview(
   const key = `${payload.workspaceId}/${payload.projectId}/renders/preview/${narratedSha.slice(0, 2)}/preview.mp4`;
   await deps.storage.put({key, body: bytes, contentType: 'video/mp4', sha256: narratedSha});
 
-  const renderRow = await deps.db
-    .insert(renders)
-    .values({
-      workspaceId: payload.workspaceId,
-      projectId: payload.projectId,
-      kind: 'PREVIEW',
+  await deps.db
+    .update(renders)
+    .set({
       status: 'succeeded',
+      progress: 100,
       mp4Key: key,
       mp4Sha256: output.sha256,
-      providerCostUsd: '0',
       completedAt: new Date(),
     })
-    .returning();
+    .where(eq(renders.id, renderRow.id));
   await deps.db
     .update(projects)
-    .set({latestPreviewRenderId: renderRow[0]!.id})
+    .set({latestPreviewRenderId: renderRow.id})
     .where(eq(projects.id, payload.projectId));
 
   await deps.usage.record({

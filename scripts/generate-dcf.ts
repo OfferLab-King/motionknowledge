@@ -32,6 +32,10 @@ async function main(): Promise<void> {
         language: 'en',
         tone: 'professional',
         style: 'professional',
+        format: 'explainer',
+        templateId: 'modern-explainer',
+        styleId: 'signature',
+        styleVersion: 1,
         aspectRatio: '16:9',
       })
       .returning();

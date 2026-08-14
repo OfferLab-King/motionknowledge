@@ -110,6 +110,43 @@ describe('workspace tenant isolation', () => {
   });
 });
 
+describe('project style identity persistence', () => {
+  it('persists format, template and style identity on create', async () => {
+    const owner = await createUserWithWorkspace();
+    const project = await new ProjectRepositoryImpl(fixture.serviceDb).create({
+      workspaceId: owner.workspaceId,
+      title: 'Styled project',
+      audienceLevel: 'beginner',
+      targetDurationSeconds: 300,
+      format: 'tutorial',
+      templateId: 'whiteboard-teacher',
+      styleId: 'handwritten',
+    });
+    const row = await fixture.serviceDb.query.projects.findFirst({where: eq(projects.id, project.id)});
+    expect(row?.format).toBe('tutorial');
+    expect(row?.templateId).toBe('whiteboard-teacher');
+    expect(row?.styleId).toBe('handwritten');
+    expect(row?.styleVersion).toBe(1);
+  });
+
+  it('changes style with a version bump via the repository', async () => {
+    const owner = await createUserWithWorkspace();
+    const repo = new ProjectRepositoryImpl(fixture.serviceDb);
+    const project = await repo.create({
+      workspaceId: owner.workspaceId,
+      title: 'Style switch project',
+      audienceLevel: 'beginner',
+      targetDurationSeconds: 300,
+      styleId: 'signature',
+    });
+    const changed = await repo.updateStyle({projectId: project.id, workspaceId: owner.workspaceId, styleId: 'editorial', styleVersion: 2});
+    expect(changed).toBe(true);
+    const row = await fixture.serviceDb.query.projects.findFirst({where: eq(projects.id, project.id)});
+    expect(row?.styleId).toBe('editorial');
+    expect(row?.styleVersion).toBe(2);
+  });
+});
+
 describe('artifact promotion', () => {
   it('promotes one immutable active version and supersedes the previous', async () => {
     const owner = await createUserWithWorkspace();

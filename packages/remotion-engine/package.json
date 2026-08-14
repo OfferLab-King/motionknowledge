@@ -12,7 +12,8 @@
     "lint": "echo 'no lint configured'",
     "typecheck": "tsc --noEmit",
     "test": "echo 'no unit tests'",
-    "test:smoke": "vitest run render.smoke.test.ts"
+    "test:smoke": "vitest run render.smoke.test.ts",
+    "test:matrix": "vitest run showcase.smoke.test.ts"
   },
   "dependencies": {
     "@motionknowledge/assets": "workspace:*",

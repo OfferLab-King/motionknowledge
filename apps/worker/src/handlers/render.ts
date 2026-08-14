@@ -39,6 +39,8 @@ export async function handleRenderFinal(
     width: deps.config.renderWidth,
     height: deps.config.renderHeight,
     fps: deps.config.fps,
+    styleId: project.styleId ?? previewManifest.style?.styleId ?? 'signature',
+    styleVersion: project.styleVersion ?? previewManifest.style?.styleVersion ?? 1,
   });
   RenderManifestV1.parse(manifest);
 
@@ -69,7 +71,26 @@ export async function handleRenderFinal(
 
   const scratch = await mkdtemp(join(tmpdir(), 'mk-final-'));
   const videoPath = join(scratch, 'final.mp4');
-  await renderProject(manifest, videoPath);
+  const renderRow = (
+    await deps.db
+      .insert(renders)
+      .values({
+        workspaceId: payload.workspaceId,
+        projectId: payload.projectId,
+        kind: 'FINAL',
+        status: 'rendering',
+        progress: 0,
+        providerCostUsd: '0',
+      })
+      .returning()
+  )[0]!;
+  let lastReported = -1;
+  await renderProject(manifest, videoPath, (progress) => {
+    if (progress - lastReported >= 5 || progress >= 100) {
+      lastReported = progress;
+      void deps.db.update(renders).set({progress}).where(eq(renders.id, renderRow.id));
+    }
+  });
   const {attachNarration} = await import('../lib/narration');
   const finalVideoPath = join(scratch, 'final-narrated.mp4');
   await attachNarration(deps, manifest, videoPath, finalVideoPath);
@@ -122,13 +143,11 @@ export async function handleRenderFinal(
     providerCostUsd: '0',
   });
 
-  const renderRow = await deps.db
-    .insert(renders)
-    .values({
-      workspaceId: payload.workspaceId,
-      projectId: payload.projectId,
-      kind: 'FINAL',
+  await deps.db
+    .update(renders)
+    .set({
       status: 'succeeded',
+      progress: 100,
       mp4Key: videoKey,
       mp4Sha256: videoSha256,
       srtKey: srtKey ?? null,
@@ -142,13 +161,12 @@ export async function handleRenderFinal(
       videoCodec: probe.videoCodec,
       audioCodec: probe.audioCodec,
       fps: Math.round(probe.fps),
-      providerCostUsd: '0',
       completedAt: new Date(),
     })
-    .returning();
+    .where(eq(renders.id, renderRow.id));
   await deps.db
     .update(projects)
-    .set({latestRenderResultId: renderRow[0]!.id})
+    .set({latestRenderResultId: renderRow.id})
     .where(eq(projects.id, payload.projectId));
 
   await deps.usage.record({

@@ -2,6 +2,8 @@ import {Card, CardHeader, StatusPill} from '@motionknowledge/ui';
 import {getServiceDb} from '../../../lib/db';
 import {getSessionUser} from '../../../lib/supabase/auth';
 import {getWorkspaceMemberships} from '../../../services/projects';
+import {listStyles} from '@motionknowledge/visual-library/style';
+import {StylePreview} from '../../../components/projects/StylePreview';
 
 export default async function SettingsPage() {
   const user = await getSessionUser();
@@ -16,7 +18,7 @@ export default async function SettingsPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-3xl">
       <h1 className="mb-8 text-2xl font-bold text-[#f8fafc]">Settings</h1>
       <div className="space-y-6">
         <Card>
@@ -51,6 +53,20 @@ export default async function SettingsPage() {
               </div>
             ))
           )}
+        </Card>
+        <Card>
+          <CardHeader title="Style previews" subtitle="The same miniature explanation rendered deterministically in every registered style." />
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {listStyles().map((style) => (
+              <div key={style.id} className="overflow-hidden rounded-lg border border-[#2a4568]">
+                <StylePreview styleId={style.id} width={200} height={113} />
+                <div className="bg-[#0f1c30] px-2 py-2">
+                  <div className="text-xs font-semibold text-[#f8fafc]">{style.name}</div>
+                  <div className="text-[10px] text-[#9fb2c8]">v{style.version}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </Card>
       </div>
     </div>

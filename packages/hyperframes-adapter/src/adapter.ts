@@ -8,15 +8,26 @@ import {validateHyperFrameRequest} from './validate';
 
 const execFileAsync = promisify(execFile);
 
+/**
+ * The container never inherits the host environment: only the explicit
+ * HYPERFRAME_* variables are passed via `-e`. The credential guard exists for
+ * the opt-in `inheritEnv` case, where host env vars WOULD be forwarded.
+ */
+export interface DockerOptions {
+  inheritEnv?: boolean;
+}
+
 export function buildDockerArgs(request: HyperFrameRequest, paths?: {
   inputDir: string;
   outputDir: string;
-}): string[] {
-  const env = Object.entries(process.env).filter(([key]) =>
-    /token|secret|authorization|api[_]?key|password/i.test(key),
-  );
-  if (env.length > 0) {
-    throw new Error('Refusing to pass credential-bearing environment into render container');
+}, options: DockerOptions = {}): string[] {
+  if (options.inheritEnv) {
+    const env = Object.entries(process.env).filter(([key]) =>
+      /token|secret|authorization|api[_]?key|password/i.test(key),
+    );
+    if (env.length > 0) {
+      throw new Error('Refusing to pass credential-bearing environment into render container');
+    }
   }
   const inputDir = paths?.inputDir ?? '/var/hyperframes/input';
   const outputDir = paths?.outputDir ?? '/var/hyperframes/out';
@@ -43,14 +54,14 @@ export function buildDockerArgs(request: HyperFrameRequest, paths?: {
 }
 
 export class HyperFramesAdapter {
-  constructor(private readonly defaults: {dockerImage: string}) {}
+  constructor(private readonly defaults: {dockerImage: string; inheritEnv?: boolean}) {}
 
   async render(request: HyperFrameRequest, paths: {inputDir: string; outputDir: string}): Promise<HyperFrameResult> {
     const validated = validateHyperFrameRequest(request);
     await mkdir(paths.outputDir, {recursive: true});
     await rm(join(paths.outputDir, 'video.mp4'), {force: true});
     const {execFileAsync} = await import('./exec');
-    const args = buildDockerArgs(validated, paths);
+    const args = buildDockerArgs(validated, paths, {inheritEnv: this.defaults.inheritEnv});
     const timeoutMs = validated.timeoutSeconds * 1000;
     try {
       await execFileAsync('docker', args, {

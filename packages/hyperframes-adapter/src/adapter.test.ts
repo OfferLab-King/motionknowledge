@@ -29,6 +29,20 @@ describe('hyperframes sandbox policy', () => {
     expect(args).toContain('--cap-drop');
   });
 
+  it('refuses to inherit a credential-bearing environment when asked to forward it', () => {
+    const previous = process.env.HYPERFRAMES_ADAPTER_TEST_SECRET;
+    process.env.HYPERFRAMES_ADAPTER_TEST_SECRET = 'should-not-leak';
+    try {
+      expect(() => buildDockerArgs(request, undefined, {inheritEnv: true})).toThrow(/credential/);
+      // Default mode (no env forwarding) never refuses, even with keys present.
+      const args = buildDockerArgs(request);
+      expect(args.join(' ')).not.toContain('HYPERFRAMES_ADAPTER_TEST_SECRET');
+    } finally {
+      if (previous === undefined) delete process.env.HYPERFRAMES_ADAPTER_TEST_SECRET;
+      else process.env.HYPERFRAMES_ADAPTER_TEST_SECRET = previous;
+    }
+  });
+
   it('rejects out-of-bound requests', () => {
     expect(() =>
       validateHyperFrameRequest({

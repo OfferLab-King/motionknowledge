@@ -16,6 +16,8 @@ export interface VisualDefinition<T = unknown> {
   schemaVersion: 1;
   engine: 'remotion';
   preview: string;
+  /** Supported visual treatments for this component (see ThemeTokenSchema.visualLanguage). */
+  variants?: ReadonlyArray<string>;
   propsSchema: z.ZodType<T>;
   component: React.ComponentType<VisualComponentProps<any>>;
 }

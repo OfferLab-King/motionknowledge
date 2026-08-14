@@ -57,6 +57,17 @@ export interface ArtifactRepository {
     workspaceId: string;
     artifactType: ArtifactType;
   }): Promise<ArtifactVersion<T> | null>;
+  listVersions<T>(input: {
+    projectId: string;
+    workspaceId: string;
+    artifactType: ArtifactType;
+  }): Promise<Array<ArtifactVersion<T>>>;
+  restoreVersion(input: {
+    projectId: string;
+    workspaceId: string;
+    artifactType: ArtifactType;
+    versionId: string;
+  }): Promise<boolean>;
 }
 
 type VersionTable = PgTable & {
@@ -64,6 +75,7 @@ type VersionTable = PgTable & {
   projectId: PgColumn;
   workspaceId: PgColumn;
   isActive: PgColumn;
+  createdAt: PgColumn;
 };
 
 const versionTables: Record<ArtifactType, VersionTable> = {
@@ -124,16 +136,16 @@ export class ArtifactRepositoryImpl implements ArtifactRepository {
     const table = versionTables[input.artifactType];
     const rows = await this.db
       .select()
-      .from(table as never)
+      .from(table)
       .where(
         and(
           eq(table.projectId, input.projectId),
           eq(table.workspaceId, input.workspaceId),
           eq(table.isActive, true),
-        ) as SQL,
+        ),
       )
       .limit(1);
-    const row = rows[0] as Record<string, unknown> | undefined;
+    const row = rows[0];
     if (!row) return null;
     return {
       id: String(row.id),
@@ -146,5 +158,55 @@ export class ArtifactRepositoryImpl implements ArtifactRepository {
       createdAt: row.createdAt as Date,
       provider: 'provider' in row ? String(row.provider) : undefined,
     };
+  }
+
+  async listVersions<T>(input: {
+    projectId: string;
+    workspaceId: string;
+    artifactType: ArtifactType;
+  }): Promise<Array<ArtifactVersion<T>>> {
+    const table = versionTables[input.artifactType];
+    const rows = await this.db
+      .select()
+      .from(table)
+      .where(and(eq(table.projectId, input.projectId), eq(table.workspaceId, input.workspaceId)))
+      .orderBy(table.createdAt);
+    return rows.map((row) => ({
+      id: String(row.id),
+      projectId: String(row.projectId),
+      workspaceId: String(row.workspaceId),
+      schemaVersion: Number(row.schemaVersion),
+      payload: row.payload as T,
+      inputHash: String(row.inputHash),
+      isActive: Boolean(row.isActive),
+      createdAt: row.createdAt as Date,
+      provider: 'provider' in row ? String(row.provider) : undefined,
+    }));
+  }
+
+  async restoreVersion(input: {
+    projectId: string;
+    workspaceId: string;
+    artifactType: ArtifactType;
+    versionId: string;
+  }): Promise<boolean> {
+    const table = versionTables[input.artifactType];
+    return this.db.transaction(async (tx) => {
+      const target = await tx
+        .select()
+        .from(table)
+        .where(
+          and(
+            eq(table.id, input.versionId),
+            eq(table.projectId, input.projectId),
+            eq(table.workspaceId, input.workspaceId),
+          ),
+        )
+        .limit(1);
+      if (!target[0]) return false;
+      await tx.update(table).set({isActive: false}).where(eq(table.projectId, input.projectId));
+      await tx.update(table).set({isActive: true}).where(eq(table.id, input.versionId));
+      return true;
+    });
   }
 }

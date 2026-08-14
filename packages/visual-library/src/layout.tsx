@@ -1,6 +1,9 @@
 import {AbsoluteFill} from 'remotion';
 import type {CSSProperties, ReactNode} from 'react';
 import type {Theme} from './theme';
+import {surfaceStyle} from './styling';
+import {HandUnderline, useDrawProgress} from './components/variants';
+import {useCurrentFrame} from 'remotion';
 
 export function SafeArea(props: {
   theme: Theme;
@@ -11,10 +14,10 @@ export function SafeArea(props: {
   return (
     <AbsoluteFill
       style={{
-        paddingTop: props.theme.safeArea.y,
-        paddingBottom: props.theme.safeArea.y,
-        paddingLeft: props.theme.safeArea.x,
-        paddingRight: props.theme.safeArea.x,
+        paddingTop: props.theme.safeAreaY,
+        paddingBottom: props.theme.safeAreaY,
+        paddingLeft: props.theme.safeAreaX,
+        paddingRight: props.theme.safeAreaX,
         justifyContent: props.center ? 'center' : 'flex-start',
         alignItems: props.center ? 'center' : 'stretch',
         ...props.style,
@@ -25,17 +28,19 @@ export function SafeArea(props: {
   );
 }
 
-export function Panel(props: {theme: Theme; children: ReactNode; style?: CSSProperties}) {
+export function Panel(props: {theme: Theme; children: ReactNode; style?: CSSProperties; seed?: number}) {
+  const theme = props.theme;
+  const jitter = theme.visualLanguage === 'hand-drawn' ? (props.seed ?? 0) % 2 === 0 ? -0.6 : 0.5 : 0;
+  const handDrawnBorder =
+    theme.visualLanguage === 'hand-drawn'
+      ? {border: 'none', outline: 'none', boxShadow: `0 1px 0 rgba(46,42,36,0.06), 2px 2px 0 ${theme.surfaces.borderColor}, -1px -1px 0 ${theme.surfaces.borderColor}`}
+      : {};
   return (
     <div
       style={{
-        background: props.theme.colors.surface,
-        borderRadius: props.theme.radius.md,
-        padding: props.theme.spacing.lg,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: props.theme.spacing.sm,
-        ...props.style,
+        ...surfaceStyle(theme, {padding: theme.spacing.lg, display: 'flex', flexDirection: 'column', gap: theme.spacing.sm, ...props.style}),
+        ...handDrawnBorder,
+        transform: jitter !== 0 ? `rotate(${jitter}deg)` : undefined,
       }}
     >
       {props.children}
@@ -72,9 +77,9 @@ export function TruncatedText(props: {
     <div
       style={{
         color: props.theme.colors.text,
-        fontSize: 30,
+        fontSize: props.theme.typography.body,
         lineHeight: 1.35,
-        fontFamily: 'sans-serif',
+        fontFamily: props.theme.fonts.body,
         ...props.style,
       }}
     >
@@ -82,21 +87,61 @@ export function TruncatedText(props: {
         <div key={i}>{line}</div>
       ))}
       {overflow ? (
-        <div style={{color: props.theme.colors.muted, fontSize: 22, marginTop: 6}}>…</div>
+        <div style={{color: props.theme.colors.muted, fontSize: props.theme.typography.caption, marginTop: 6}}>…</div>
       ) : null}
     </div>
   );
 }
 
 export function Kicker(props: {text: string; theme: Theme}) {
+  const theme = props.theme;
+  if (theme.visualLanguage === 'hand-drawn') {
+    const progress = useDrawProgress(8, 22);
+    const frame = useCurrentFrame();
+    void frame;
+    return (
+      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+        <div
+          style={{
+            color: theme.colors.primary,
+            textTransform: 'uppercase',
+            letterSpacing: 2,
+            fontSize: theme.typography.caption,
+            fontWeight: 700,
+            fontFamily: theme.fonts.heading,
+          }}
+        >
+          {props.text}
+        </div>
+        <HandUnderline theme={theme} width={Math.max(60, props.text.length * 15)} progress={progress} style={{marginTop: 4}} />
+      </div>
+    );
+  }
+  if (theme.visualLanguage === 'minimal') {
+    return (
+      <div
+        style={{
+          color: theme.colors.muted,
+          textTransform: 'uppercase',
+          letterSpacing: 4,
+          fontSize: theme.typography.caption,
+          fontWeight: 600,
+          fontFamily: theme.fonts.heading,
+        }}
+      >
+        {props.text}
+      </div>
+    );
+  }
   return (
     <div
       style={{
-        color: props.theme.colors.primary,
+        color: theme.colors.primary,
         textTransform: 'uppercase',
         letterSpacing: 3,
-        fontSize: 20,
+        fontSize: theme.typography.caption,
         fontWeight: 600,
+        fontFamily: theme.fonts.heading,
       }}
     >
       {props.text}

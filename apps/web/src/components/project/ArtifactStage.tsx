@@ -32,7 +32,7 @@ export function ArtifactStagePage(props: {
           ← Back to project
         </Link>
       </div>
-      <ArtifactEditor artifact={{key: props.active, label: props.label, ...props.artifact}} />
+      <ArtifactEditor artifact={{key: props.active, label: props.label, ...props.artifact}} projectId={props.projectId} />
     </div>
   );
 }

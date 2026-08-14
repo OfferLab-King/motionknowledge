@@ -48,6 +48,9 @@ jobs:
       - name: Short render smoke test
         run: pnpm --filter @motionknowledge/remotion-engine test:smoke
 
+      - name: Style matrix smoke (one frame per style, 16:9 and 9:16)
+        run: pnpm --filter @motionknowledge/remotion-engine test:matrix
+
   database-integration:
     runs-on: ubuntu-latest
     timeout-minutes: 30

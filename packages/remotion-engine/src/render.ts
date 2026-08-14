@@ -13,6 +13,8 @@ export interface RenderOutput {
   byteCount: number;
 }
 
+export type RenderProgressCallback = (progress: number) => void;
+
 const REMOTION_COMPOSITION = new URL('./ProjectComposition.tsx', import.meta.url).pathname;
 
 export async function writeRenderEntry(manifest: RenderManifest, scratchDir: string): Promise<string> {
@@ -36,7 +38,11 @@ export async function writeRenderEntry(manifest: RenderManifest, scratchDir: str
   return entryPath;
 }
 
-export async function renderProject(manifest: RenderManifest, outputPath: string): Promise<RenderOutput> {
+export async function renderProject(
+  manifest: RenderManifest,
+  outputPath: string,
+  onProgress?: RenderProgressCallback,
+): Promise<RenderOutput> {
   RenderManifestV1.parse(manifest);
   await mkdir(dirname(outputPath), {recursive: true});
   const scratchDir = await mkdtemp(join(tmpdir(), 'mk-render-'));
@@ -50,6 +56,7 @@ export async function renderProject(manifest: RenderManifest, outputPath: string
       codec: 'h264',
       outputLocation: outputPath,
       concurrency: Math.min(4, availableParallelism()),
+      onProgress: (progress) => onProgress?.(Math.round(progress.progress * 100)),
     });
     const bytes = await readFile(outputPath);
     return {
@@ -71,6 +78,46 @@ export async function renderSceneStill(manifest: RenderManifest, frame: number, 
     const serveUrl = await bundle({entryPoint, webpackOverride: (config) => config});
     const composition = await selectComposition({serveUrl, id: 'ProjectComposition'});
     await renderStill({composition, serveUrl, output: outputPath, frame});
+    const bytes = await readFile(outputPath);
+    return {
+      path: outputPath,
+      sha256: createHash('sha256').update(bytes).digest('hex'),
+      byteCount: bytes.byteLength,
+    };
+  } finally {
+    await rm(scratchDir, {recursive: true, force: true});
+  }
+}
+
+const SHOWCASE_ENTRY = new URL('./showcase-entry.tsx', import.meta.url).pathname;
+
+/**
+ * Render a deterministic style showcase still: the same sample explanation in
+ * one style. Used by the style-matrix smoke test and for gallery thumbnails.
+ */
+export async function renderStyleShowcaseStill(styleId: string, outputPath: string, opts: {frame?: number; width?: number; height?: number} = {}): Promise<RenderOutput> {
+  await mkdir(dirname(outputPath), {recursive: true});
+  const scratchDir = await mkdtemp(join(tmpdir(), 'mk-showcase-'));
+  try {
+    const propsPath = join(scratchDir, 'showcase-props.json');
+    await writeFile(propsPath, JSON.stringify({styleId, aspectRatio: '16:9'}));
+    const entryPath = join(scratchDir, 'showcase-entry.tsx');
+    const entry = [
+      `import {registerRoot, Composition} from 'remotion';`,
+      `import {StyleShowcase} from ${JSON.stringify(SHOWCASE_ENTRY)};`,
+      `import props from ${JSON.stringify(propsPath)};`,
+      `const Root = () => (`,
+      `  <Composition id="StyleShowcase"`,
+      `    component={() => <StyleShowcase styleId={props.styleId} aspectRatio={props.aspectRatio} />}`,
+      `    durationInFrames={240} fps={30}`,
+      `    width={${opts.width ?? 1280}} height={${opts.height ?? 720}} />`,
+      `);`,
+      `registerRoot(Root);`,
+    ].join('\n');
+    await writeFile(entryPath, entry);
+    const serveUrl = await bundle({entryPoint: entryPath, webpackOverride: (config) => config});
+    const composition = await selectComposition({serveUrl, id: 'StyleShowcase'});
+    await renderStill({composition, serveUrl, output: outputPath, frame: opts.frame ?? 100});
     const bytes = await readFile(outputPath);
     return {
       path: outputPath,

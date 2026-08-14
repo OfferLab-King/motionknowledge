@@ -5,4 +5,6 @@ export * from './types';
 export * from './registry';
 export * from './fixtures';
 export * from './catalog.schema';
+export * from './styling';
+export * from './style/registry';
 export * from './components';

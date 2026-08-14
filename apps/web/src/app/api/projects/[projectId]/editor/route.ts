@@ -47,6 +47,8 @@ export async function GET(request: Request, {params}: {params: Promise<{projectI
         width: project.aspectRatio === '9:16' ? 720 : 1280,
         height: project.aspectRatio === '9:16' ? 1280 : 720,
         fps: 30,
+        styleId: project.styleId ?? 'signature',
+        styleVersion: project.styleVersion ?? 1,
         audioUrlFor: (key) => `/api/objects/${key}`,
       })
     : null;

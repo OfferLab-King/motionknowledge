@@ -2,7 +2,7 @@ import type {PgBoss} from 'pg-boss';
 import {z} from 'zod';
 import type {WorkerDeps} from './deps';
 import {executeHandler, JobFailure, type JobEnvelope} from '@motionknowledge/jobs';
-import {ResearchPayloadSchema, handleResearchProject} from './handlers/research';
+import {ResearchPayloadSchema, IngestPayloadSchema, handleResearchProject, handleIngestSource} from './handlers/research';
 import {PipelinePayloadSchema, handleGenerateOutline} from './handlers/outline';
 import {handleGenerateScript} from './handlers/script';
 import {handleGenerateStoryboard} from './handlers/storyboard';
@@ -13,6 +13,7 @@ import {handleGeneratePreview} from './handlers/preview';
 import {handleRunQa} from './handlers/qa';
 import {handleRenderFinal} from './handlers/render';
 import {handleGenerateThumbnail} from './handlers/thumbnail';
+import {HyperframePayloadSchema, handleRenderHyperframe} from './handlers/hyperframes';
 import {markJobFailed} from './lib/helpers';
 
 export interface RegisteredHandler {
@@ -23,7 +24,7 @@ export interface RegisteredHandler {
 
 export function buildHandlers(deps: WorkerDeps): RegisteredHandler[] {
   return [
-    {operation: 'INGEST_SOURCE', payloadSchema: ResearchPayloadSchema, run: handleResearchProject},
+    {operation: 'INGEST_SOURCE', payloadSchema: IngestPayloadSchema, run: handleIngestSource},
     {operation: 'RESEARCH_PROJECT', payloadSchema: ResearchPayloadSchema, run: handleResearchProject},
     {operation: 'GENERATE_OUTLINE', payloadSchema: PipelinePayloadSchema, run: handleGenerateOutline},
     {operation: 'GENERATE_SCRIPT', payloadSchema: PipelinePayloadSchema, run: handleGenerateScript},
@@ -35,6 +36,7 @@ export function buildHandlers(deps: WorkerDeps): RegisteredHandler[] {
     {operation: 'RUN_QA', payloadSchema: PipelinePayloadSchema, run: handleRunQa},
     {operation: 'RENDER_FINAL', payloadSchema: PipelinePayloadSchema, run: handleRenderFinal},
     {operation: 'GENERATE_THUMBNAIL', payloadSchema: PipelinePayloadSchema, run: handleGenerateThumbnail},
+    {operation: 'RENDER_HYPERFRAME', payloadSchema: HyperframePayloadSchema, run: handleRenderHyperframe},
   ] as RegisteredHandler[];
 }
 

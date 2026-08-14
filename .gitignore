@@ -21,3 +21,10 @@ supabase/.branches
 supabase/.temp
 supabase/.status
 .turbo/
+
+# local verification artifacts
+var/style-previews/
+apps/web/test-results/
+apps/web/playwright-report/
+test-results/
+playwright-report/

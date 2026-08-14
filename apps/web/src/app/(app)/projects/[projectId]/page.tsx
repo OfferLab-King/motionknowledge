@@ -4,6 +4,12 @@ import {getSessionUser} from '../../../../lib/supabase/auth';
 import {getWorkspaceMemberships} from '../../../../services/projects';
 import {ProjectWorkflow} from '../../../../components/project/ProjectWorkflow';
 import {listJobs} from '../../../../services/artifacts';
+import {StyleSwitcher} from '../../../../components/project/StyleSwitcher';
+import {ProjectActions} from '../../../../components/project/ProjectActions';
+import {PreviewPlayback} from '../../../../components/project/PreviewPlayback';
+import {getStyleDefinition} from '@motionknowledge/visual-library/style';
+import {renders as rendersTable} from '@motionknowledge/database';
+import {eq} from 'drizzle-orm';
 
 export default async function ProjectPage({params}: {params: Promise<{projectId: string}>}) {
   const {projectId} = await params;
@@ -18,14 +24,25 @@ export default async function ProjectPage({params}: {params: Promise<{projectId:
   if (!project || String(project.workspaceId) !== workspaceId) notFound();
 
   const jobs = await listJobs(db, projectId);
+  const style = getStyleDefinition(project.styleId ?? 'signature');
+  const renderRows = await db.select().from(rendersTable).where(eq(rendersTable.projectId, projectId));
+  const latestPreview = [...renderRows].reverse().find((row) => row.kind === 'PREVIEW' && row.status === 'succeeded' && row.mp4Key);
+  const initialPreview = latestPreview ? {renderId: String(latestPreview.id), durationSeconds: latestPreview.durationSeconds} : null;
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[#f8fafc]">{project.title}</h1>
-        <p className="mt-1 text-sm text-[#9fb2c8]">
-          {Math.round(project.targetDurationSeconds / 60)} min · {project.audienceLevel}
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[#f8fafc]">{project.title}</h1>
+          <p className="mt-1 text-sm text-[#9fb2c8]">
+            {Math.round(project.targetDurationSeconds / 60)} min · {project.audienceLevel}
+            {style ? <span> · {style.name}</span> : null}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <StyleSwitcher projectId={projectId} styleId={project.styleId ?? 'signature'} />
+          <ProjectActions projectId={projectId} title={project.title} />
+        </div>
       </div>
       <ProjectWorkflow
         projectId={projectId}
@@ -51,9 +68,15 @@ export default async function ProjectPage({params}: {params: Promise<{projectId:
           })),
           sceneProgress: {ready: 0, total: 0},
           finalRenderStatus: null,
+          renderProgress: null,
+          latestPreview: null,
           narrationModel: null,
+          qa: null,
         }}
       />
+      <div className="mt-6">
+        <PreviewPlayback projectId={projectId} initialPreview={initialPreview} />
+      </div>
     </div>
   );
 }

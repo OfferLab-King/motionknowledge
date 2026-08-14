@@ -2,7 +2,6 @@ import {eq} from 'drizzle-orm';
 import {scenes, sceneVersions, audioAssets, type Database} from '@motionknowledge/database';
 import {StoryboardV1, SceneV1, type CaptionSegment, type RenderManifest, type Scene, type Storyboard, type TimedWord} from '@motionknowledge/schemas';
 import {groupCaptions} from '@motionknowledge/captions';
-import {professionalTheme} from '@motionknowledge/visual-library';
 
 export async function loadStoryboard(db: Database, projectId: string, workspaceId: string): Promise<Storyboard> {
   const {ArtifactRepositoryImpl} = await import('@motionknowledge/database');

@@ -3,6 +3,7 @@ import {getSessionUser} from '../../../../../../lib/supabase/auth';
 import {getServiceDb} from '../../../../../../lib/db';
 import {getWorkspaceMemberships} from '../../../../../../services/projects';
 import {resolveRenderDownload, signObjectUrl} from '../../../../../../services/downloads';
+import {trackExportDownload} from '../../../../../../services/analytics-helpers';
 
 export async function GET(_request: Request, {params}: {params: Promise<{projectId: string; renderId: string}>}) {
   const {projectId, renderId} = await params;
@@ -21,5 +22,6 @@ export async function GET(_request: Request, {params}: {params: Promise<{project
   if (!download || !download.objectKey) {
     return NextResponse.json({error: 'not found'}, {status: 404});
   }
+  trackExportDownload({userId: user.id, workspaceId, projectId, renderId, kind});
   return NextResponse.json({url: signObjectUrl(download.objectKey, 300), kind, expiresInSeconds: 300});
 }

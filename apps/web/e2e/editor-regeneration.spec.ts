@@ -47,7 +47,7 @@ test.afterAll(async () => {
 });
 
 test('edits and regenerates only one scene', async ({page}) => {
-  test.setTimeout(600_000);
+  test.setTimeout(900_000);
   await page.goto('/register');
   await page.getByLabel('Email').fill(seededEmail);
   await page.getByLabel('Password').fill('Correct-Horse-42!');
@@ -117,4 +117,96 @@ test('edits and regenerates only one scene', async ({page}) => {
   await expect(page.getByText('Scene ready').last()).toBeVisible({timeout: 120_000});
   await expect(page.getByTestId('scene-definition-version')).toHaveText(untouchedVersion!);
   await expect(page.getByLabel('Scene title')).toHaveValue('Present value, step by step');
+
+  // Duplicate the selected scene: a copy appears right after it.
+  await page.getByTestId('scene-scene-calculation').getByRole('button', {name: 'Duplicate scene'}).click();
+  await expect(page.getByTestId('scene-scene-calculation-copy')).toBeVisible({timeout: 30_000});
+  await expect(page.getByTestId('scene-calculation-copy-version')).toHaveText('v1');
+
+  // Re-select the original scene and move it down; it must now come after
+  // value-rate-chart, with the copy after it.
+  await page.getByRole('button', {name: 'Present value, step by step'}).first().click();
+  await page.getByTestId('scene-scene-calculation').getByRole('button', {name: 'Move scene down'}).click();
+  const sceneRows = page.locator('[data-testid^="scene-scene-"]');
+  await expect(sceneRows.nth(4)).toHaveAttribute('data-testid', 'scene-scene-value-rate-chart');
+  await expect(sceneRows.nth(5)).toHaveAttribute('data-testid', 'scene-scene-calculation');
+  await expect(sceneRows.nth(6)).toHaveAttribute('data-testid', 'scene-scene-calculation-copy');
+
+  // Switch the visual component of the selected (original) scene and save.
+  const versionBeforeSwitch = await page.getByTestId('scene-calculation-version').textContent();
+  await page.getByLabel('Visual component').selectOption('bar-chart');
+  await page.getByRole('button', {name: 'Save edits'}).click();
+  await expect(page.getByTestId('scene-calculation-version')).not.toHaveText(versionBeforeSwitch!, {timeout: 30_000});
+  await expect(page.getByLabel('Visual component')).toHaveValue('bar-chart');
+
+  // Delete the duplicate (first row now); the original remains.
+  await page.getByTestId('scene-scene-calculation-copy').getByRole('button', {name: 'Delete scene'}).click();
+  await expect(page.getByTestId('scene-scene-calculation-copy')).toHaveCount(0);
+  await expect(page.getByTestId('scene-scene-calculation')).toBeVisible();
+
+  // Restore the previous version of the edited scene (pre-bar-chart).
+  await page.getByRole('button', {name: /Version history/}).click();
+  await page.getByRole('button', {name: 'Restore'}).first().click();
+  await expect(page.getByLabel('Visual component')).toHaveValue('step-by-step-calculation', {timeout: 30_000});
+
+  // Edit the lesson outline artifact: promote a new version and reload.
+  const lessonRows = await db.execute(sql`select payload from public.lesson_plan_versions where project_id = ${seededProjectId} and is_active = true limit 1`);
+  const lesson = (lessonRows[0] as {payload?: Record<string, unknown>})?.payload;
+  if (!lesson) throw new Error('no active lesson plan');
+  lesson.title = `${lesson.title} (edited)`;
+  const saveResponse = await page.request.post(`/api/projects/${seededProjectId}/artifacts/lesson-plan`, {
+    data: {payload: lesson},
+  });
+  expect(saveResponse.ok()).toBeTruthy();
+  const saveBody = (await saveResponse.json()) as {versionId?: string; error?: string};
+  expect(saveBody.versionId).toBeTruthy();
+  await page.goto(`/projects/${seededProjectId}/outline`);
+  await expect(page.getByLabel('Artifact JSON')).toHaveValue(/\(edited\)/, {timeout: 30_000});
+
+  // Invalid artifact saves are rejected without promoting anything.
+  const badResponse = await page.request.post(`/api/projects/${seededProjectId}/artifacts/lesson-plan`, {
+    data: {payload: {schemaVersion: 1, title: 'Broken'}},
+  });
+  expect(badResponse.status()).toBe(400);
+
+  // Version history: restore the pre-edit lesson plan.
+  const versionsResponse = await page.request.get(`/api/projects/${seededProjectId}/artifacts/lesson-plan`);
+  expect(versionsResponse.ok()).toBeTruthy();
+  const versionsBody = (await versionsResponse.json()) as {versions: Array<{versionId: string; isActive: boolean}>};
+  expect(versionsBody.versions.length).toBeGreaterThanOrEqual(2);
+  const oldest = versionsBody.versions[0]!;
+  expect(oldest.isActive).toBe(false);
+  const restoreResponse = await page.request.post(`/api/projects/${seededProjectId}/artifacts/lesson-plan/restore`, {
+    data: {versionId: oldest.versionId},
+  });
+  expect(restoreResponse.ok()).toBeTruthy();
+  await page.goto(`/projects/${seededProjectId}/outline`);
+  await expect(page.getByLabel('Artifact JSON')).toHaveValue(/What is a Discounted Cash Flow\?/, {timeout: 30_000});
+  await expect(page.getByLabel('Artifact JSON')).not.toHaveValue(/\(edited\)/);
+
+  // QA checks are surfaced on the project page.
+  await page.goto(`/projects/${seededProjectId}`);
+  await expect(page.getByRole('heading', {name: 'QA checks'})).toBeVisible({timeout: 30_000});
+  await expect(page.getByText('Passed')).toBeVisible();
+
+  // Project actions: rename, duplicate, delete the copy.
+  await page.getByRole('button', {name: 'Project actions'}).click();
+  await page.getByRole('button', {name: 'Rename project'}).click();
+  await page.getByLabel('Project title').fill('Renamed DCF project');
+  await page.getByRole('button', {name: 'Save'}).click();
+  await expect(page.getByRole('heading', {name: 'Renamed DCF project'})).toBeVisible({timeout: 30_000});
+
+  await page.getByRole('button', {name: 'Project actions'}).click();
+  await page.getByRole('button', {name: 'Duplicate project'}).click();
+  await expect(page).toHaveURL(/projects\/[a-f0-9-]+/, {timeout: 30_000});
+  await expect(page.getByRole('heading', {name: 'Renamed DCF project (copy)'})).toBeVisible({timeout: 30_000});
+  const copyUrl = page.url();
+  const copyId = copyUrl.split('/').at(-1)!;
+
+  await page.getByRole('button', {name: 'Project actions'}).click();
+  await page.getByRole('button', {name: 'Delete project'}).click();
+  await page.getByRole('button', {name: 'Delete forever'}).click();
+  await expect(page).toHaveURL(/dashboard/, {timeout: 30_000});
+  const copyRows = await db.execute(sql`select id from public.projects where id = ${copyId}`);
+  expect(copyRows.length).toBe(0);
 });

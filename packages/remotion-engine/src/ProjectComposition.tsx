@@ -1,7 +1,9 @@
-import {getVisualDefinition, professionalTheme} from '@motionknowledge/visual-library';
+import {getVisualDefinition, resolveSceneTheme, resolveTheme, type Theme} from '@motionknowledge/visual-library';
+import {visualRouter} from '@motionknowledge/visual-router';
 import {AbsoluteFill, Audio, Sequence} from 'remotion';
 import type {RenderManifest, RenderScene} from '@motionknowledge/schemas';
 import {useEffect, useMemo, useState} from 'react';
+import {rootBackgroundStyle} from '@motionknowledge/visual-library';
 
 /**
  * Fetches the narration for the browser player and exposes it as a blob: URL.
@@ -54,25 +56,50 @@ export interface ProjectCompositionProps {
   audioUrls?: Record<string, string>;
 }
 
-const TYPED_VISUALS: Record<string, string> = {
-  'title-hero': 'title-hero',
-  'cashflow-timeline': 'cashflow-timeline',
-  formula: 'formula',
-  comparison: 'comparison',
-};
+/**
+ * Resolve the effective theme for one scene: manifest tokens (project style)
+ * merged with the scene's own overrides, and the component variant selected
+ * by the router. Browser Player and worker renders share this exact
+ * interpretation.
+ */
+export function resolveSceneRender(
+  manifest: RenderManifest,
+  scene: RenderScene,
+): {theme: Theme; componentId: string | null; variant: string | null} {
+  const visual = scene.visual as {type?: string; data?: {visualId?: string}} | undefined;
+  const componentId = visual && visual.type === 'catalog' ? (visual.data?.visualId ?? null) : null;
+  const decision = visualRouter.route(
+    {
+      schemaVersion: 1,
+      id: scene.sceneId,
+      sceneVersionId: scene.sceneVersionId,
+      index: scene.index,
+      title: scene.title,
+      narration: '',
+      durationSeconds: Math.round(scene.durationInFrames / scene.fps),
+      claimIds: [],
+      chapterId: '',
+      visual: scene.visual as never,
+      provider: {provider: 'remotion', model: 'manifest', costUsd: '0', durationMs: 0},
+      inputHash: scene.inputHash,
+      styleOverride: scene.styleOverride ?? {},
+    } as never,
+    {
+      durationSeconds: Math.round(scene.durationInFrames / scene.fps),
+      hasApprovedAssets: false,
+      hasLicensedAssets: false,
+      language: 'en',
+      styleId: manifest.style?.styleId ?? 'signature',
+    },
+  );
+  const theme = resolveSceneTheme(manifest.theme as Theme, scene.styleOverride ?? undefined, decision.componentId ?? componentId ?? undefined);
+  return {theme, componentId: decision.engine === 'remotion' ? decision.componentId : null, variant: decision.variant};
+}
 
-export function SceneRenderer(props: {scene: RenderScene; index: number}) {
-  const {scene} = props;
-  const definition = useMemo(() => {
-    const visual = scene.visual as {type?: string; data?: unknown};
-    if (!visual || typeof visual !== 'object') return undefined;
-    if (visual.type === 'catalog') {
-      const data = (visual.data ?? {}) as {visualId?: string};
-      return data.visualId ? getVisualDefinition(data.visualId) : undefined;
-    }
-    const typedId = TYPED_VISUALS[visual.type ?? ''];
-    return typedId ? getVisualDefinition(typedId) : undefined;
-  }, [scene.visual]);
+export function SceneRenderer(props: {scene: RenderScene; index: number; manifest: RenderManifest}) {
+  const {scene, manifest} = props;
+  const resolved = useMemo(() => resolveSceneRender(manifest, scene), [manifest, scene]);
+  const definition = resolved.componentId ? getVisualDefinition(resolved.componentId) : undefined;
 
   if (definition) {
     const Component = definition.component;
@@ -84,7 +111,7 @@ export function SceneRenderer(props: {scene: RenderScene; index: number}) {
       return (
         <Component
           data={parsed.data}
-          theme={professionalTheme}
+          theme={resolved.theme}
           durationInFrames={scene.durationInFrames}
         />
       );
@@ -92,8 +119,8 @@ export function SceneRenderer(props: {scene: RenderScene; index: number}) {
   }
 
   return (
-    <AbsoluteFill style={{backgroundColor: professionalTheme.colors.background, justifyContent: 'center', alignItems: 'center'}}>
-      <div style={{color: professionalTheme.colors.text, fontSize: 56, fontWeight: 700, padding: 64, textAlign: 'center'}}>
+    <AbsoluteFill style={{...rootBackgroundStyle(resolved.theme), justifyContent: 'center', alignItems: 'center'}}>
+      <div style={{color: resolved.theme.colors.text, fontSize: 56, fontWeight: 700, padding: 64, textAlign: 'center', fontFamily: resolved.theme.fonts.heading}}>
         {scene.title}
       </div>
     </AbsoluteFill>
@@ -103,20 +130,21 @@ export function SceneRenderer(props: {scene: RenderScene; index: number}) {
 export function ProjectComposition(props: ProjectCompositionProps) {
   const {manifest} = props;
   if (!manifest) {
+    const theme = resolveTheme('signature');
     return (
-      <AbsoluteFill style={{backgroundColor: professionalTheme.colors.background}}>
-        <div style={{color: professionalTheme.colors.text, fontSize: 40, textAlign: 'center', marginTop: 80}}>
+      <AbsoluteFill style={rootBackgroundStyle(theme)}>
+        <div style={{color: theme.colors.text, fontSize: 40, textAlign: 'center', marginTop: 80}}>
           No manifest provided
         </div>
       </AbsoluteFill>
     );
   }
   return (
-    <AbsoluteFill style={{backgroundColor: manifest.theme.background}}>
+    <AbsoluteFill style={rootBackgroundStyle(manifest.theme as Theme)}>
       {manifest.scenes.map((scene: RenderScene, index: number) => (
         <Sequence key={scene.sceneVersionId} from={scene.startFrame} durationInFrames={scene.durationInFrames} premountFor={30}>
           <SceneWithAudio audioUrl={scene.narrationAudioKey ? props.audioUrls?.[scene.narrationAudioKey] : undefined}>
-            <SceneRenderer scene={scene} index={index} />
+            <SceneRenderer scene={scene} index={index} manifest={manifest} />
           </SceneWithAudio>
         </Sequence>
       ))}

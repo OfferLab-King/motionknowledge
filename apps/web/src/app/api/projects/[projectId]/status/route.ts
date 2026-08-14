@@ -6,7 +6,7 @@ import {getWorkspaceMemberships} from '../../../../../services/projects';
 import {getActiveArtifact, listJobs, listScenes} from '../../../../../services/artifacts';
 import {audioAssets} from '@motionknowledge/database';
 import {listProjectRenders} from '../../../../../services/downloads';
-import type {LessonPlan, Script, Storyboard} from '@motionknowledge/schemas';
+import type {LessonPlan, Script, Storyboard, QAResult} from '@motionknowledge/schemas';
 import type {Scene} from '@motionknowledge/schemas';
 
 export interface StageStatus {
@@ -34,6 +34,7 @@ export async function GET(_request: Request, {params}: {params: Promise<{project
   const lesson = await getActiveArtifact<LessonPlan>(db, projectId, workspaceId, 'LESSON_PLAN');
   const script = await getActiveArtifact<Script>(db, projectId, workspaceId, 'SCRIPT');
   const storyboard = await getActiveArtifact<Storyboard>(db, projectId, workspaceId, 'STORYBOARD');
+  const qaResult = await getActiveArtifact<QAResult>(db, projectId, workspaceId, 'QA_RESULT');
   const jobs = await listJobs(db, projectId);
   const audioRows = await db.select({model: audioAssets.model, provider: audioAssets.provider}).from(audioAssets).where(eq(audioAssets.projectId, projectId)).limit(1);
   const sceneList = await listScenes(db, projectId);
@@ -114,7 +115,21 @@ export async function GET(_request: Request, {params}: {params: Promise<{project
       total: sceneList.length,
     },
     finalRenderStatus: renders.at(-1)?.status ?? null,
+    renderProgress: renders.filter((render) => render.status === 'rendering').at(-1)?.progress ?? null,
+    latestPreview: (() => {
+      const preview = [...renders].reverse().find((render) => render.kind === 'PREVIEW' && render.status === 'succeeded' && render.mp4Key);
+      return preview
+        ? {renderId: preview.id, durationSeconds: preview.durationSeconds}
+        : null;
+    })(),
     narrationModel: audioRows[0]?.model ?? null,
+    qa: qaResult
+      ? {
+          passed: qaResult.passed,
+          evaluatedAt: qaResult.evaluatedAt,
+          checks: qaResult.checks.map((check) => ({code: check.code, passed: check.passed, critical: check.critical, message: check.message})),
+        }
+      : null,
   });
 }
 

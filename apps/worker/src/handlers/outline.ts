@@ -56,6 +56,7 @@ export async function handleGenerateOutline(
       audienceLevel: project.audienceLevel as 'beginner' | 'intermediate' | 'advanced',
       language: project.language,
       tone: project.tone,
+      format: project.format ?? 'explainer',
     },
     {workspaceId: payload.workspaceId, projectId: payload.projectId, correlationId: input.envelope.idempotencyKey},
   );

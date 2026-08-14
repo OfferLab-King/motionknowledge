@@ -24,8 +24,20 @@ export const SCRIPT_SYSTEM = [
 export const STORYBOARD_SYSTEM = [
   'You are an expert storyboard artist for deterministic educational visuals.',
   'Emit SceneV1 objects, not JSX. Choose visuals from the provided compact catalog by id.',
+  'The visual APPEARANCE is decided by the chosen style at render time; choose visuals for their SEMANTIC fit only',
+  '(process, comparison, timeline, chart, definition, worked example, etc.). Never emit custom visual code.',
+  'Follow the provided format grammar: it describes the pedagogical structure to plan around, not a rigid scene list.',
   'Keep narration tied to the script segments and cite claim IDs on every scene.',
 ].join(' ');
+
+export function visualStyleForPrompt(styleId: string, styleName: string, description: string): string {
+  return `Visual style: ${styleName} (${styleId}). ${description}`;
+}
+
+export function templateGuidanceForPrompt(templateId: string | null, templateName: string | null, guidance: string): string {
+  if (!templateId) return 'No template; plan from the format grammar alone.';
+  return `Template: ${templateName} (${templateId}). Planning guidance: ${guidance}`;
+}
 
 export const METADATA_SYSTEM = [
   'You are a publishing assistant. Produce title, description, and tags for an educational video.',

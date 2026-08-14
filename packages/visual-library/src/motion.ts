@@ -3,7 +3,7 @@ import {interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 export function useReveal(input: {
   startFrame?: number;
   durationFrames?: number;
-  type?: 'fade' | 'slide-up' | 'scale';
+  type?: 'fade' | 'slide-up' | 'scale' | 'draw';
 }): {opacity: number; translateY: number; scale: number} {
   const frame = useCurrentFrame();
   const start = input.startFrame ?? 0;
@@ -19,14 +19,23 @@ export function useReveal(input: {
   return {opacity, translateY, scale};
 }
 
-export function useSequencedReveal(index: number, stepFrames = 10): {
+export interface SpringConfig {
+  damping?: number;
+  stiffness?: number;
+}
+
+export function useSequencedReveal(index: number, stepFrames = 10, springConfig?: SpringConfig): {
   opacity: number;
   translateY: number;
 } {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const start = index * stepFrames;
-  const s = spring({frame: frame - start, fps, config: {damping: 200, stiffness: 200}});
+  const s = spring({
+    frame: frame - start,
+    fps,
+    config: {damping: springConfig?.damping ?? 200, stiffness: springConfig?.stiffness ?? 200},
+  });
   return {
     opacity: interpolate(frame, [start, start + 8], [0, 1], {
       extrapolateLeft: 'clamp',

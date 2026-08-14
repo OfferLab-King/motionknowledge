@@ -24,13 +24,29 @@ interface JobView {
   safeError: string | null;
 }
 
+interface QaCheckView {
+  code: string;
+  passed: boolean;
+  critical: boolean;
+  message: string;
+}
+
+interface QaView {
+  passed: boolean;
+  evaluatedAt: string;
+  checks: QaCheckView[];
+}
+
 interface ProjectStatusData {
   status: string;
   stages: StageStatus[];
   jobs: JobView[];
   sceneProgress: {ready: number; total: number};
   finalRenderStatus: string | null;
+  renderProgress: number | null;
+  latestPreview: {renderId: string; durationSeconds: number | null} | null;
   narrationModel: string | null;
+  qa: QaView | null;
 }
 
 const STATUS_MESSAGE: Record<string, string> = {
@@ -97,6 +113,19 @@ export function ProjectWorkflow(props: {
 
   const message = STATUS_MESSAGE[data.status] ?? 'Working…';
   const renderable = data.status === 'READY_FOR_REVIEW' || data.status === 'APPROVED';
+  const [previewBusy, setPreviewBusy] = useState(false);
+  const [previewDone, setPreviewDone] = useState(false);
+
+  async function regeneratePreview() {
+    setPreviewBusy(true);
+    setPreviewDone(false);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/preview/regenerate`, {method: 'POST'});
+      if (response.ok) setPreviewDone(true);
+    } finally {
+      setPreviewBusy(false);
+    }
+  }
   const complete = data.status === 'COMPLETE';
 
   return (
@@ -104,7 +133,7 @@ export function ProjectWorkflow(props: {
       <div className="rounded-lg border border-[#2a4568] bg-[#0f1c30] p-4">
         <StageRail stages={stagesToRail(data.stages, projectId)} active="sources" />
         <div className="mt-6">
-          <JobStatus jobs={data.jobs} />
+          <JobStatus jobs={data.jobs} projectId={projectId} />
         </div>
       </div>
       <div className="space-y-4">
@@ -136,15 +165,67 @@ export function ProjectWorkflow(props: {
               Open scene editor
             </Link>
             {renderable || complete ? (
-              <Link
-                href={`/projects/${projectId}/exports`}
-                className="rounded-lg bg-[#59d5e0] px-4 py-2 text-sm font-semibold text-[#08111f] hover:bg-[#4bc4d0]"
-              >
-                {complete ? 'View exports' : 'Final render'}
-              </Link>
+              <>
+                <button
+                  type="button"
+                  disabled={previewBusy}
+                  onClick={() => void regeneratePreview()}
+                  className="rounded-lg border border-[#2a4568] bg-[#10213a] px-4 py-2 text-sm font-semibold text-[#f8fafc] hover:bg-[#1a3050] disabled:opacity-50"
+                >
+                  {previewBusy ? 'Enqueuing…' : 'Regenerate preview'}
+                </button>
+                <Link
+                  href={`/projects/${projectId}/exports`}
+                  className="rounded-lg bg-[#59d5e0] px-4 py-2 text-sm font-semibold text-[#08111f] hover:bg-[#4bc4d0]"
+                >
+                  {complete ? 'View exports' : 'Final render'}
+                </Link>
+              </>
             ) : null}
           </div>
+          {previewDone ? (
+            <p className="mt-2 text-xs text-[#4ade80]">Preview regeneration enqueued — status will update as it renders.</p>
+          ) : null}
+          {data.renderProgress != null ? (
+            <div className="mt-3">
+              <div className="mb-1 flex justify-between text-xs text-[#9fb2c8]">
+                <span>Rendering…</span>
+                <span>{data.renderProgress}%</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-[#0a1526]">
+                <div
+                  className="h-full rounded-full bg-[#59d5e0] transition-all"
+                  style={{width: `${Math.max(2, data.renderProgress)}%`}}
+                />
+              </div>
+            </div>
+          ) : null}
         </div>
+        {data.qa ? (
+          <div className="rounded-lg border border-[#2a4568] bg-[#0f1c30] p-4">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-[#f8fafc]">QA checks</h3>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${data.qa.passed ? 'bg-[#10213a] text-[#4ade80]' : 'bg-[#10213a] text-[#fb7185]'}`}>
+                {data.qa.passed ? 'Passed' : 'Failed'}
+              </span>
+            </div>
+            <ul className="grid gap-1 sm:grid-cols-2">
+              {data.qa.checks.map((check) => (
+                <li key={check.code} className="flex items-center justify-between gap-2 rounded bg-[#0a1526] px-2 py-1 text-xs">
+                  <span className="truncate text-[#9fb2c8]">
+                    {check.code.replace(/_/g, ' ').toLowerCase()}
+                    {check.critical ? ' · critical' : ''}
+                    {check.message ? <span className="ml-1 text-[10px] text-[#64748b]">— {check.message}</span> : null}
+                  </span>
+                  <span className={check.passed ? 'text-[#4ade80]' : 'text-[#fb7185]'}>{check.passed ? '✓' : '✕'}</span>
+                </li>
+              ))}
+            </ul>
+            {!data.qa.passed ? (
+              <p className="mt-2 text-xs text-[#9fb2c8]">Regenerate the preview to re-run these checks.</p>
+            ) : null}
+          </div>
+        ) : null}
         <p className="text-sm text-[#9fb2c8]">
           Status updates automatically every few seconds — no refresh needed.
         </p>

@@ -7,8 +7,11 @@ import {
   sources,
   scenes,
   sceneVersions,
+  audioAssets,
   renders,
   generationJobs,
+  claimSourceLinks,
+  claims,
   type Database,
 } from '@motionknowledge/database';
 import {sha256Hex, hashText} from '@motionknowledge/assets';
@@ -52,7 +55,11 @@ async function drainJobs(projectId: string, timeoutMs: number): Promise<void> {
   throw new Error('Timed out draining jobs');
 }
 
-async function createDcfProject(workspaceId: string) {
+/**
+ * Creates a DCF project with a real supplied text source (stored normalized
+ * text) so research must extract claims from supplied material.
+ */
+async function createDcfProjectWithSuppliedSource(workspaceId: string) {
   const project = await db
     .insert(projects)
     .values({
@@ -68,35 +75,31 @@ async function createDcfProject(workspaceId: string) {
     .returning();
   const projectRow = project[0]!;
   const rawBytes = new TextEncoder().encode(DCF_SOURCE_TEXT);
-  await db.insert(sources).values({
-    projectId: projectRow.id,
-    workspaceId,
-    kind: 'text',
-    title: 'Discounted Cash Flow — Educator Reference',
-    rawSha256: sha256Hex(rawBytes),
-    normalizedSha256: hashText(DCF_SOURCE_TEXT),
-    originalUrl: null,
-    fetchedAt: null,
-    language: 'en',
-    byteCount: rawBytes.length,
-    status: 'PROCESSED',
+  const source = await db
+    .insert(sources)
+    .values({
+      projectId: projectRow.id,
+      workspaceId,
+      kind: 'text',
+      title: 'Discounted Cash Flow — Educator Reference',
+      rawSha256: sha256Hex(rawBytes),
+      normalizedSha256: hashText(DCF_SOURCE_TEXT),
+      originalUrl: null,
+      fetchedAt: new Date(),
+      language: 'en',
+      byteCount: rawBytes.length,
+      status: 'PROCESSED',
+    })
+    .returning();
+  const sourceRow = source[0]!;
+  const {sourceTextKey} = await import('@motionknowledge/research');
+  await deps.storage.put({
+    key: sourceTextKey(workspaceId, projectRow.id, String(sourceRow.id)),
+    body: rawBytes,
+    contentType: 'text/plain',
+    sha256: sha256Hex(rawBytes),
   });
-  return {projectId: projectRow.id, workspaceId};
-}
-
-async function runProjectToPreview(projectId: string): Promise<void> {
-  const project = await db.query.projects.findFirst({where: eq(projects.id, projectId)});
-  if (!project) throw new Error('Project not found');
-  await deps.queue.enqueue({
-    jobId: `${projectId}-research`,
-    workspaceId: project.workspaceId,
-    projectId,
-    operation: 'RESEARCH_PROJECT',
-    inputHash: '0'.repeat(64),
-    idempotencyKey: `e2e|${projectId}|research`,
-    payload: {workspaceId: project.workspaceId, projectId},
-  });
-  await waitForProjectStatus(projectId, 'READY_FOR_REVIEW', 480_000);
+  return {projectId: projectRow.id, sourceRow};
 }
 
 async function regenerateScene(projectId: string, sceneKey: string, patch: {title?: string}): Promise<void> {
@@ -163,15 +166,64 @@ beforeAll(async () => {
 }, 60_000);
 
 describe('DCF end-to-end acceptance', () => {
-  it('generates, edits one scene, rerenders, and exports MP4 plus SRT', async () => {
-    const {projectId} = await createDcfProject(fixtureWorkspaceId);
-    await runProjectToPreview(projectId);
+  it('extracts claims from a supplied source, then edits, rerenders and exports MP4 plus SRT', async () => {
+    const {projectId, sourceRow} = await createDcfProjectWithSuppliedSource(fixtureWorkspaceId);
+
+    // Research must extract claims from the supplied source text and link
+    // them to the source row.
+    await deps.queue.enqueue({
+      jobId: `${projectId}-research-supplied`,
+      workspaceId: fixtureWorkspaceId,
+      projectId,
+      operation: 'RESEARCH_PROJECT',
+      inputHash: '9'.repeat(64),
+      idempotencyKey: `e2e|${projectId}|research-supplied`,
+      payload: {workspaceId: fixtureWorkspaceId, projectId},
+    });
+    await waitForProjectStatus(projectId, 'OUTLINE_READY', 480_000);
+    const linkRows = await db
+      .select({claimId: claimSourceLinks.claimId, sourceId: claimSourceLinks.sourceId})
+      .from(claimSourceLinks)
+      .where(eq(claimSourceLinks.sourceId, sourceRow.id));
+    expect(linkRows.length).toBeGreaterThan(0);
+    const claimRows = await db.select().from(claims).where(eq(claims.projectId, projectId));
+    expect(claimRows.length).toBeGreaterThan(0);
+
+    // The pipeline continues automatically to a reviewable preview.
+    await waitForProjectStatus(projectId, 'READY_FOR_REVIEW', 900_000);
 
     const calcSceneRow = (await db
       .select()
       .from(scenes)
       .where(and(eq(scenes.projectId, projectId), eq(scenes.sceneKey, 'scene-calculation'))))[0];
     if (!calcSceneRow) throw new Error('scene-calculation missing');
+
+    // Forced narration regeneration synthesizes a new audio asset for the
+    // active version even though audio already exists.
+    const activeVersionId = calcSceneRow.activeSceneVersionId;
+    if (!activeVersionId) throw new Error('scene-calculation has no active version');
+    const activeVersion = (await db.select().from(sceneVersions).where(eq(sceneVersions.id, activeVersionId)))[0];
+    if (!activeVersion) throw new Error('active version missing');
+    const ttsBefore = await db.select().from(audioAssets).where(eq(audioAssets.sceneId, calcSceneRow.id));
+    await deps.queue.enqueue({
+      jobId: `${projectId}-tts-force`,
+      workspaceId: fixtureWorkspaceId,
+      projectId,
+      operation: 'SYNTHESIZE_TTS',
+      inputHash: 'f'.repeat(64),
+      idempotencyKey: `e2e|${projectId}|tts-force|${activeVersion.id}`,
+      payload: {
+        workspaceId: fixtureWorkspaceId,
+        projectId,
+        sceneId: 'scene-calculation',
+        sceneVersionId: (activeVersion.payload as {sceneVersionId?: string}).sceneVersionId,
+        force: true,
+      },
+    });
+    await drainJobs(projectId, 480_000);
+    const ttsAfter = await db.select().from(audioAssets).where(eq(audioAssets.sceneId, calcSceneRow.id));
+    expect(ttsAfter.length).toBe(ttsBefore.length + 1);
+
     const before = await db
       .select()
       .from(sceneVersions)
@@ -194,5 +246,5 @@ describe('DCF end-to-end acceptance', () => {
     const srt = await readFile(render.srtPath, 'utf8');
     expect(srt).toContain('discount rate');
     expect(srt).toContain('-->');
-  }, 600_000);
+  }, 1_500_000);
 });

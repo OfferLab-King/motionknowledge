@@ -11,7 +11,12 @@ export const ScenePayloadSchema = z.object({
   workspaceId: z.string(),
   projectId: z.string(),
   sceneId: z.string(),
-  patch: z.object({title: z.string().optional(), narration: z.string().optional(), durationSeconds: z.number().optional()}).optional(),
+  patch: z.object({
+    title: z.string().optional(),
+    narration: z.string().optional(),
+    durationSeconds: z.number().optional(),
+    visual: z.unknown().optional(),
+  }).optional(),
 });
 
 export async function handleGenerateScene(
@@ -53,12 +58,14 @@ export async function handleGenerateScene(
     title: payload.patch?.title ?? base.title,
     narration: payload.patch?.narration ?? base.narration,
     durationSeconds: payload.patch?.durationSeconds ?? base.durationSeconds,
+    visual: payload.patch?.visual ?? base.visual,
     sceneVersionId: `${base.id}-v${versionNumber}`,
     inputHash: stableHash({
       id: base.id,
       title: payload.patch?.title ?? base.title,
       narration: payload.patch?.narration ?? base.narration,
       durationSeconds: payload.patch?.durationSeconds ?? base.durationSeconds,
+      visual: payload.patch?.visual ?? base.visual,
       versionNumber,
     }),
   };

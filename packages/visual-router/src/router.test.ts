@@ -36,6 +36,24 @@ describe('visual routing policy', () => {
     });
     expect(visualRouter.route(cashflowScene, {durationSeconds: 18, hasApprovedAssets: false, hasLicensedAssets: false, language: 'en'}).engine).toBe('remotion');
     expect(visualRouter.route(cashflowScene, {durationSeconds: 18, hasApprovedAssets: false, hasLicensedAssets: false, language: 'en'}).componentId).toBe('cashflow-timeline');
+    const styled = visualRouter.route(cashflowScene, {durationSeconds: 18, hasApprovedAssets: false, hasLicensedAssets: false, language: 'en', styleId: 'handwritten'});
+    expect(styled.styleId).toBe('handwritten');
+    expect(styled.engine).toBe('remotion');
+  });
+
+  it('maps the style to a component variant when the component declares variants', () => {
+    const scene = makeScene({
+      type: 'catalog',
+      schemaVersion: 1,
+      intent: 'show',
+      data: {visualId: 'process-flow', title: 'Process', data: {}},
+    });
+    const decision = visualRouter.route(scene, {durationSeconds: 20, hasApprovedAssets: false, hasLicensedAssets: false, language: 'en', styleId: 'handwritten'});
+    expect(decision.variant).toBe('hand-drawn');
+    const business = visualRouter.route(scene, {durationSeconds: 20, hasApprovedAssets: false, hasLicensedAssets: false, language: 'en', styleId: 'business'});
+    expect(business.variant).toBe('business');
+    const plain = visualRouter.route(scene, {durationSeconds: 20, hasApprovedAssets: false, hasLicensedAssets: false, language: 'en'});
+    expect(plain.variant).toBeNull();
   });
 
   it('routes catalog instructions through the registry', () => {

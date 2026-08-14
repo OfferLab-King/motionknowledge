@@ -4,6 +4,12 @@ const email = `creator-${Date.now()}@example.test`;
 const password = 'Correct-Horse-42!';
 
 test('user registers and creates a configured project', async ({page}) => {
+  // Landing page shows the style showcase, style gallery and template strip.
+  await page.goto('/');
+  await expect(page.getByRole('heading', {name: /Turn knowledge into/})).toBeVisible();
+  await expect(page.getByText('MotionKnowledge Signature')).toBeVisible({timeout: 30_000});
+  await expect(page.getByRole('heading', {name: 'Start from a template'})).toBeVisible();
+
   await page.goto('/register');
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);

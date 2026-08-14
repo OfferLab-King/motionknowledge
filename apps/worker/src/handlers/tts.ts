@@ -11,6 +11,7 @@ export const TtsPayloadSchema = z.object({
   projectId: z.string(),
   sceneId: z.string(),
   sceneVersionId: z.string().optional(),
+  force: z.boolean().optional(),
 });
 
 export async function handleSynthesizeTts(
@@ -47,7 +48,7 @@ export async function handleSynthesizeTts(
     .from(audioAssets)
     .where(and(eq(audioAssets.sceneId, row.id), eq(audioAssets.sceneVersionId, activeVersionId)))
     .limit(1);
-  if (existing[0]) {
+  if (existing[0] && !payload.force) {
     await markJobSucceeded(deps.db, input.envelope.idempotencyKey);
     return;
   }

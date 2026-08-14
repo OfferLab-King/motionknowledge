@@ -14,12 +14,13 @@
     "start": "node --import tsx src/index.ts"
   },
   "dependencies": {
-    "drizzle-orm": "0.45.2",
     "@motionknowledge/assets": "workspace:*",
     "@motionknowledge/audio": "workspace:*",
     "@motionknowledge/captions": "workspace:*",
+    "@motionknowledge/config": "workspace:*",
     "@motionknowledge/content-engine": "workspace:*",
     "@motionknowledge/database": "workspace:*",
+    "@motionknowledge/hyperframes-adapter": "workspace:*",
     "@motionknowledge/jobs": "workspace:*",
     "@motionknowledge/observability": "workspace:*",
     "@motionknowledge/providers": "workspace:*",
@@ -30,12 +31,12 @@
     "@motionknowledge/testkit": "workspace:*",
     "@motionknowledge/tts": "workspace:*",
     "@motionknowledge/usage": "workspace:*",
-    "@motionknowledge/visual-router": "workspace:*",
-    "zod": "4.4.3",
-    "@motionknowledge/config": "workspace:*",
     "@motionknowledge/visual-library": "workspace:*",
+    "@motionknowledge/visual-router": "workspace:*",
+    "dotenv": "17.4.2",
+    "drizzle-orm": "0.45.2",
     "pg-boss": "12.27.0",
-    "dotenv": "17.4.2"
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@types/node": "24.10.1",

@@ -28,6 +28,7 @@ export default async function ExportsPage({params}: {params: Promise<{projectId:
   const renderViews: ExportView[] = renders.map((render) => ({
     renderId: render.id,
     status: render.status,
+    progress: render.progress ?? 0,
     createdAt: render.createdAt.toISOString(),
     durationSeconds: render.durationSeconds,
     width: render.width,
@@ -54,7 +55,17 @@ export default async function ExportsPage({params}: {params: Promise<{projectId:
         <div className="space-y-6">
           <ExportPanel projectId={projectId} initialRenders={renderViews} projectStatus={project.status} />
           <Card>
-            <CardHeader title="Sources" subtitle="The material this project is grounded in." />
+            <div className="mb-2 flex items-center justify-between">
+              <CardHeader title="Sources" subtitle="The material this project is grounded in." />
+              {sources.length > 0 ? (
+                <a
+                  href={`/api/projects/${projectId}/exports/sources`}
+                  className="rounded-lg border border-[#2a4568] bg-[#10213a] px-3 py-1.5 text-xs font-semibold text-[#f8fafc] hover:bg-[#1a3050]"
+                >
+                  Download source list
+                </a>
+              ) : null}
+            </div>
             {sources.length === 0 ? (
               <p className="text-sm text-[#9fb2c8]">No sources recorded.</p>
             ) : (

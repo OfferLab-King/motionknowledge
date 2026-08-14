@@ -38,7 +38,9 @@ export async function handleGenerateStoryboard(
       lessonPlan: lesson,
       claims: researchClaims,
       aspectRatio: project.aspectRatio as '16:9' | '9:16',
-      style: project.style,
+      format: project.format ?? 'explainer',
+      templateId: project.templateId ?? null,
+      styleId: project.styleId ?? 'signature',
     },
     {workspaceId: payload.workspaceId, projectId: payload.projectId, correlationId: input.envelope.idempotencyKey},
   );

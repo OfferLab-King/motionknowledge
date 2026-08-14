@@ -1,4 +1,5 @@
 export * from './ssrf';
+export * from './source-text';
 export * from './sources';
 export * from './claims';
 export * from './service';

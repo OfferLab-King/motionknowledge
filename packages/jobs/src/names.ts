@@ -11,6 +11,7 @@ export const JOB_NAMES = [
   'RUN_QA',
   'RENDER_FINAL',
   'GENERATE_THUMBNAIL',
+  'RENDER_HYPERFRAME',
 ] as const;
 
 export type JobName = (typeof JOB_NAMES)[number];
@@ -28,4 +29,5 @@ export const JOB_RETRY_POLICIES: Readonly<Record<JobName, 'transient' | 'never'>
   RUN_QA: 'never',
   RENDER_FINAL: 'transient',
   GENERATE_THUMBNAIL: 'transient',
+  RENDER_HYPERFRAME: 'transient',
 };

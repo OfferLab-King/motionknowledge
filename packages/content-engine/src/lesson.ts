@@ -1,6 +1,7 @@
 import {LessonPlanV1, type LessonPlan, type ResearchClaim} from '@motionknowledge/schemas';
 import type {LLMProvider} from '@motionknowledge/providers';
 import {LESSON_SYSTEM, wrapUntrusted} from './prompts';
+import {formatGrammarForPrompt, getFormat} from './formats';
 
 export interface GenerateLessonInput {
   projectTitle: string;
@@ -9,6 +10,7 @@ export interface GenerateLessonInput {
   audienceLevel: 'beginner' | 'intermediate' | 'advanced';
   language: string;
   tone: string;
+  format?: string;
 }
 
 export async function generateLesson(
@@ -16,6 +18,9 @@ export async function generateLesson(
   llm: LLMProvider,
   idempotencyKey: string,
 ): Promise<LessonPlan> {
+  const formatId = input.format ?? 'explainer';
+  const format = getFormat(formatId);
+  if (!format) throw new Error(`Unknown format: ${formatId}`);
   const claimText = input.claims
     .map((claim) => `[${claim.id}] ${claim.text}`)
     .join('\n');
@@ -30,9 +35,10 @@ export async function generateLesson(
         `Target duration (seconds): ${input.targetDurationSeconds}`,
         `Language: ${input.language}`,
         `Tone: ${input.tone}`,
+        formatGrammarForPrompt(formatId),
         'Available claims:',
         claimText,
-        'Produce the lesson plan JSON. Sections must reference claim IDs from the available claims.',
+        'Produce the lesson plan JSON. Order sections according to the format grammar, adapted to the content. Sections must reference claim IDs from the available claims.',
       ].join('\n'),
     ),
     idempotencyKey,

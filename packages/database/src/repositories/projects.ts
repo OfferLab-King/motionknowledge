@@ -12,6 +12,10 @@ export interface ProjectRecord {
   language: string;
   tone: string;
   style: string;
+  format: string;
+  templateId: string | null;
+  styleId: string;
+  styleVersion: number;
   aspectRatio: string;
   status: string;
   createdAt: Date;
@@ -26,6 +30,9 @@ export interface NewProject {
   language?: string;
   tone?: string;
   style?: string;
+  format?: string;
+  templateId?: string | null;
+  styleId?: string;
   aspectRatio?: string;
   voice?: string;
 }
@@ -39,6 +46,21 @@ export interface ProjectRepository {
     workspaceId: string;
     from: ProjectStatus;
     to: ProjectStatus;
+  }): Promise<boolean>;
+  updateStyle(input: {
+    projectId: string;
+    workspaceId: string;
+    styleId: string;
+    styleVersion: number;
+  }): Promise<boolean>;
+  updateTitle(input: {
+    projectId: string;
+    workspaceId: string;
+    title: string;
+  }): Promise<boolean>;
+  deleteProject(input: {
+    projectId: string;
+    workspaceId: string;
   }): Promise<boolean>;
   listForWorkspace(workspaceId: string): Promise<ProjectRecord[]>;
 }
@@ -75,11 +97,36 @@ export class ProjectRepositoryImpl implements ProjectRepository {
         language: input.language ?? 'en',
         tone: input.tone ?? 'professional',
         style: input.style ?? 'professional',
+        format: input.format ?? 'explainer',
+        templateId: input.templateId ?? null,
+        styleId: input.styleId ?? 'signature',
         aspectRatio: input.aspectRatio ?? '16:9',
         voice: input.voice ?? 'Samantha',
       })
       .returning();
     return rows[0]!;
+  }
+
+  async updateStyle(input: {
+    projectId: string;
+    workspaceId: string;
+    styleId: string;
+    styleVersion: number;
+  }): Promise<boolean> {
+    const rows = await this.db
+      .update(projects)
+      .set({
+        styleId: input.styleId,
+        styleVersion: input.styleVersion,
+      })
+      .where(
+        and(
+          eq(projects.id, input.projectId),
+          eq(projects.workspaceId, input.workspaceId),
+        ),
+      )
+      .returning({id: projects.id});
+    return rows.length === 1;
   }
 
   async updateStatus(input: {
@@ -97,6 +144,40 @@ export class ProjectRepositoryImpl implements ProjectRepository {
           eq(projects.id, input.projectId),
           eq(projects.workspaceId, input.workspaceId),
           eq(projects.status, input.from),
+        ),
+      )
+      .returning({id: projects.id});
+    return rows.length === 1;
+  }
+
+  async updateTitle(input: {
+    projectId: string;
+    workspaceId: string;
+    title: string;
+  }): Promise<boolean> {
+    const rows = await this.db
+      .update(projects)
+      .set({title: input.title})
+      .where(
+        and(
+          eq(projects.id, input.projectId),
+          eq(projects.workspaceId, input.workspaceId),
+        ),
+      )
+      .returning({id: projects.id});
+    return rows.length === 1;
+  }
+
+  async deleteProject(input: {
+    projectId: string;
+    workspaceId: string;
+  }): Promise<boolean> {
+    const rows = await this.db
+      .delete(projects)
+      .where(
+        and(
+          eq(projects.id, input.projectId),
+          eq(projects.workspaceId, input.workspaceId),
         ),
       )
       .returning({id: projects.id});

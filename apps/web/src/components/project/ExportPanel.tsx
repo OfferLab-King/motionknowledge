@@ -12,6 +12,7 @@ export interface ExportFile {
 export interface ExportView {
   renderId: string;
   status: string;
+  progress: number;
   createdAt: string;
   durationSeconds: number | null;
   width: number | null;
@@ -58,20 +59,32 @@ export function ExportPanel(props: {
 
   const renderable = projectStatus === 'READY_FOR_REVIEW' || projectStatus === 'APPROVED';
   const complete = renders.find((render) => render.status === 'succeeded');
+  const rendering = renders.find((render) => render.status === 'rendering');
 
   return (
     <div className="space-y-4">
       {!complete ? (
         <div className="flex items-center gap-4 rounded-lg border border-[#2a4568] bg-[#0f1c30] p-4">
-          <div>
+          <div className="min-w-0">
             <p className="font-medium text-[#f8fafc]">Final render</p>
             <p className="text-sm text-[#9fb2c8]">
               Project status: {projectStatus.replace(/_/g, ' ').toLowerCase()}
             </p>
+            {rendering ? (
+              <div className="mt-2 w-56">
+                <div className="mb-1 flex justify-between text-xs text-[#9fb2c8]">
+                  <span>Rendering…</span>
+                  <span>{rendering.progress}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-[#0a1526]">
+                  <div className="h-full rounded-full bg-[#59d5e0] transition-all" style={{width: `${Math.max(2, rendering.progress)}%`}} />
+                </div>
+              </div>
+            ) : null}
           </div>
           <div className="ml-auto">
             <Button type="button" disabled={!renderable || busy} onClick={() => void requestRender()}>
-              Final render
+              {rendering ? 'Rendering…' : 'Final render'}
             </Button>
           </div>
         </div>

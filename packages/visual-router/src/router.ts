@@ -14,6 +14,23 @@ export interface VisualRouter {
   route(scene: Scene, context: RouteContext): RouteDecision;
 }
 
+/** Map a scene's visual instruction to a registered component id. */
+export function sceneToComponentId(scene: Scene): string | null {
+  const visual = scene.visual;
+  if (visual.type === 'catalog') {
+    const data = visual.data as {visualId?: string};
+    return data.visualId && getVisualDefinition(data.visualId) ? data.visualId : null;
+  }
+  const typed: Record<string, string> = {
+    'title-hero': 'title-hero',
+    'cashflow-timeline': 'cashflow-timeline',
+    formula: 'formula',
+    comparison: 'comparison',
+  };
+  const candidateId = typed[visual.type];
+  return candidateId && getVisualDefinition(candidateId) ? candidateId : null;
+}
+
 export class VisualRouterImpl implements VisualRouter {
   route(scene: Scene, context: RouteContext): RouteDecision {
     const visual = scene.visual;
@@ -30,6 +47,8 @@ export class VisualRouterImpl implements VisualRouter {
           score,
           expectedCostUsd: COST_BY_ENGINE.remotion,
           schemaVersion: 1,
+          styleId: context.styleId ?? null,
+          variant: this.resolveVariant(definition.variants ?? [], context.styleId ?? null),
         };
       }
       return this.fallback(scene, 'catalog visual id is not registered');
@@ -43,17 +62,14 @@ export class VisualRouterImpl implements VisualRouter {
         score: 0.8,
         expectedCostUsd: COST_BY_ENGINE.hyperframes,
         schemaVersion: 1,
+        styleId: context.styleId ?? null,
+        variant: null,
       };
     }
 
-    const typed: Record<string, string> = {
-      'title-hero': 'title-hero',
-      'cashflow-timeline': 'cashflow-timeline',
-      formula: 'formula',
-      comparison: 'comparison',
-    };
-    const candidateId = typed[visual.type];
-    if (candidateId && getVisualDefinition(candidateId)) {
+    const candidateId = sceneToComponentId(scene);
+    if (candidateId) {
+      const definition = getVisualDefinition(candidateId);
       return {
         engine: 'remotion',
         componentId: candidateId,
@@ -61,10 +77,29 @@ export class VisualRouterImpl implements VisualRouter {
         score: 0.95,
         expectedCostUsd: COST_BY_ENGINE.remotion,
         schemaVersion: 1,
+        styleId: context.styleId ?? null,
+        variant: this.resolveVariant(definition?.variants ?? [], context.styleId ?? null),
       };
     }
 
     return this.fallback(scene, `no registered component for instruction ${visual.type}`);
+  }
+
+  private resolveVariant(supported: ReadonlyArray<string>, styleId: string | null): string | null {
+    if (!styleId || supported.length === 0) return null;
+    // The visual language of a style maps 1:1 to the treatment name for
+    // components that declare variants (see ThemeTokenSchema.visualLanguage).
+    const languageByStyle: Record<string, string> = {
+      signature: 'polished',
+      handwritten: 'hand-drawn',
+      presentation: 'structured',
+      editorial: 'infographic',
+      business: 'business',
+      minimal: 'minimal',
+    };
+    const language = languageByStyle[styleId];
+    if (language && supported.includes(language)) return language;
+    return null;
   }
 
   private fallback(scene: Scene, reason: string): RouteDecision {
@@ -75,6 +110,8 @@ export class VisualRouterImpl implements VisualRouter {
       score: 0.2,
       expectedCostUsd: COST_BY_ENGINE.fallback,
       schemaVersion: 1,
+      styleId: null,
+      variant: null,
     };
   }
 }

@@ -18,6 +18,8 @@ export interface RouteContext {
   hasApprovedAssets: boolean;
   hasLicensedAssets: boolean;
   language: string;
+  /** Chosen visual style; the router maps it to a component variant when the component declares one. */
+  styleId?: string;
 }
 
 export interface RouteDecision {
@@ -27,6 +29,8 @@ export interface RouteDecision {
   score: number;
   expectedCostUsd: string;
   schemaVersion: 1;
+  styleId: string | null;
+  variant: string | null;
 }
 
 const FALLBACK_COMPONENT = 'definition-card';

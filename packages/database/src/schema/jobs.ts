@@ -53,6 +53,7 @@ export const renders = pgTable('renders', {
     .references(() => projects.id, {onDelete: 'cascade'}),
   kind: text('kind').notNull(),
   status: text('status').notNull().default('rendering'),
+  progress: integer('progress').notNull().default(0),
   mp4Key: text('mp4_key'),
   mp4Sha256: text('mp4_sha256'),
   srtKey: text('srt_key'),

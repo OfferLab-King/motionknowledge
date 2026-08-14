@@ -1,6 +1,6 @@
 import type {CaptionSegment, RenderManifest, Scene, TimedWord} from '@motionknowledge/schemas';
 import {groupCaptions} from '@motionknowledge/captions';
-import {professionalTheme} from '@motionknowledge/visual-library/theme';
+import {resolveTheme} from '@motionknowledge/visual-library/style';
 
 export function groupSceneCaptions(wordTimings: TimedWord[]): Array<{startMs: number; endMs: number; text: string}> {
   return groupCaptions(wordTimings, {maxWords: 7, maxDurationMs: 3200, maxCharsPerLine: 80}).map((group) => ({
@@ -18,12 +18,17 @@ export interface RenderManifestInput {
   width: number;
   height: number;
   fps: 30;
+  styleId?: string;
+  styleVersion?: number;
   audioUrlFor?: (assetKey: string) => string | null;
 }
 
 export function buildRenderManifest(input: RenderManifestInput): RenderManifest {
   const fps = input.fps;
   let cursor = 0;
+  const styleId = input.styleId ?? 'signature';
+  const styleVersion = input.styleVersion ?? 1;
+  const theme = resolveTheme(styleId);
   const renderScenes = input.sceneVersions.map((scene) => {
     const audio = input.audioByScene.get(scene.id);
     const lastWordEndMs = audio && audio.wordTimings.length > 0 ? audio.wordTimings.at(-1)!.endMs : 0;
@@ -45,6 +50,7 @@ export function buildRenderManifest(input: RenderManifestInput): RenderManifest 
       narrationStartMs: 0,
       captionSegments,
       visual: scene.visual,
+      styleOverride: scene.styleOverride ?? {},
       inputHash: scene.inputHash,
     };
   });
@@ -57,17 +63,8 @@ export function buildRenderManifest(input: RenderManifestInput): RenderManifest 
     height: input.height,
     fps,
     totalDurationInFrames: cursor,
-    theme: {
-      background: professionalTheme.colors.background,
-      surface: professionalTheme.colors.surface,
-      primary: professionalTheme.colors.primary,
-      accent: professionalTheme.colors.accent,
-      text: professionalTheme.colors.text,
-      muted: professionalTheme.colors.muted,
-      danger: professionalTheme.colors.danger,
-      safeAreaX: professionalTheme.safeArea.x,
-      safeAreaY: professionalTheme.safeArea.y,
-    },
+    theme,
+    style: {styleId, styleVersion},
     scenes: renderScenes,
     audioTracks: renderScenes
       .filter((scene) => scene.narrationAudioKey)
