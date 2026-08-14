@@ -70,6 +70,8 @@ export default async function ProjectPage({params}: {params: Promise<{projectId:
           finalRenderStatus: null,
           renderProgress: null,
           latestPreview: null,
+          previewStale: false,
+          sources: [],
           narrationModel: null,
           qa: null,
         }}

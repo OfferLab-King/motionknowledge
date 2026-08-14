@@ -31,6 +31,14 @@ interface QaCheckView {
   message: string;
 }
 
+interface SourceView {
+  id: string;
+  title: string;
+  kind: string;
+  status: string;
+  failureReason: string | null;
+}
+
 interface QaView {
   passed: boolean;
   evaluatedAt: string;
@@ -45,6 +53,8 @@ interface ProjectStatusData {
   finalRenderStatus: string | null;
   renderProgress: number | null;
   latestPreview: {renderId: string; durationSeconds: number | null} | null;
+  previewStale: boolean;
+  sources: SourceView[];
   narrationModel: string | null;
   qa: QaView | null;
 }
@@ -125,6 +135,10 @@ export function ProjectWorkflow(props: {
     } finally {
       setPreviewBusy(false);
     }
+  }
+
+  async function retrySource(sourceId: string) {
+    await fetch(`/api/projects/${projectId}/sources/${sourceId}/retry`, {method: 'POST'});
   }
   const complete = data.status === 'COMPLETE';
 
@@ -224,6 +238,43 @@ export function ProjectWorkflow(props: {
             {!data.qa.passed ? (
               <p className="mt-2 text-xs text-[#9fb2c8]">Regenerate the preview to re-run these checks.</p>
             ) : null}
+          </div>
+        ) : null}
+        {data.previewStale ? (
+          <div className="rounded-lg border border-[#f7c948]/40 bg-[#1a1a10] p-3 text-xs text-[#f7c948]">
+            The preview is out of date — scenes or narration changed since it was rendered. Regenerate it
+            before QA or review.
+          </div>
+        ) : null}
+        {data.sources.length > 0 ? (
+          <div className="rounded-lg border border-[#2a4568] bg-[#0f1c30] p-4">
+            <h3 className="mb-2 text-sm font-semibold text-[#f8fafc]">Sources</h3>
+            <ul className="space-y-1">
+              {data.sources.map((source) => (
+                <li key={source.id} className="flex items-center justify-between gap-3 text-xs">
+                  <span className="truncate text-[#9fb2c8]">{source.title}</span>
+                  <span className="flex shrink-0 items-center gap-2">
+                    <span className="text-[10px] text-[#64748b]">{source.kind}</span>
+                    {source.status === 'FAILED' ? (
+                      <>
+                        <span className="text-[#fb7185]">failed{source.failureReason ? `: ${source.failureReason.slice(0, 60)}` : ''}</span>
+                        <button
+                          type="button"
+                          onClick={() => void retrySource(source.id)}
+                          className="rounded bg-[#10213a] px-2 py-0.5 font-semibold text-[#59d5e0] hover:bg-[#1a3050]"
+                        >
+                          Retry
+                        </button>
+                      </>
+                    ) : source.status === 'PROCESSED' ? (
+                      <span className="text-[#4ade80]">processed</span>
+                    ) : (
+                      <span className="text-[#f7c948]">{source.status.toLowerCase()}</span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         ) : null}
         <p className="text-sm text-[#9fb2c8]">

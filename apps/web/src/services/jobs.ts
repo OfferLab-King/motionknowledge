@@ -1,6 +1,6 @@
-import {and, eq} from 'drizzle-orm';
-import {generationJobs, projects, scenes as scenesTable, type Database} from '@motionknowledge/database';
-import {getQueue} from '../lib/jobs';
+import {and, eq, inArray, sql} from 'drizzle-orm';
+import {generationJobs, projects, renders, scenes as scenesTable, type Database} from '@motionknowledge/database';
+import {getBoss, getQueue} from '../lib/jobs';
 import {computeInputHash, buildIdempotencyKey, type JobName} from '@motionknowledge/jobs';
 
 /** Project status a retried operation expects to resume from. */
@@ -66,4 +66,39 @@ export async function enqueuePreviewRegeneration(db: Database, input: {
   });
   await db.update(projects).set({status: 'GENERATING'}).where(eq(projects.id, input.projectId));
   return {jobId: result.id};
+}
+
+/**
+ * Cancel a queued render (preview or final). Jobs that already started
+ * rendering cannot be interrupted; the endpoint refuses those.
+ */
+export async function cancelRender(db: Database, input: {
+  workspaceId: string;
+  projectId: string;
+  renderId: string;
+}): Promise<{cancelled: boolean}> {
+  const row = (await db.select().from(renders).where(and(eq(renders.id, input.renderId), eq(renders.projectId, input.projectId))))[0];
+  if (!row) throw new Error('Render not found');
+  if (row.status !== 'rendering') throw new Error('Only in-progress renders can be cancelled');
+  const operations = row.kind === 'FINAL' ? ['RENDER_FINAL'] : ['GENERATE_PREVIEW'];
+  const jobs = await db
+    .select()
+    .from(generationJobs)
+    .where(and(eq(generationJobs.projectId, input.projectId), inArray(generationJobs.operation, operations as string[])))
+    .orderBy(generationJobs.createdAt);
+  const job = [...jobs].reverse().find((item) => item.status === 'queued' || item.status === 'running');
+  if (!job) throw new Error('No queued render job found');
+  if (job.status === 'running') throw new Error('The render is already running and cannot be interrupted');
+
+  const schema = process.env.BOSS_SCHEMA ?? 'boss';
+  const boss = await getBoss();
+  const idRows = await db.execute(sql.raw(`select id from ${schema}.job where name = '${job.operation}' and singleton_key = '${job.idempotencyKey}' and state in ('created', 'retry')`));
+  const bossId = (idRows[0] as {id?: string} | undefined)?.id;
+  if (!bossId) throw new Error('Render job no longer queued');
+  await boss.cancel(job.operation, bossId);
+  await db.update(generationJobs).set({status: 'cancelled'}).where(eq(generationJobs.id, job.id));
+  await db.update(renders).set({status: 'cancelled'}).where(eq(renders.id, input.renderId));
+  const resetTo = row.kind === 'FINAL' ? 'APPROVED' : 'READY_FOR_REVIEW';
+  await db.update(projects).set({status: resetTo}).where(eq(projects.id, input.projectId));
+  return {cancelled: true};
 }

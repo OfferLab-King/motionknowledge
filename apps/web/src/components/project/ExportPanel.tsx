@@ -57,6 +57,11 @@ export function ExportPanel(props: {
     }
   }
 
+  async function cancelRender(renderId: string) {
+    await fetch(`/api/projects/${projectId}/renders/${renderId}/cancel`, {method: 'POST'});
+    await refresh();
+  }
+
   const renderable = projectStatus === 'READY_FOR_REVIEW' || projectStatus === 'APPROVED';
   const complete = renders.find((render) => render.status === 'succeeded');
   const rendering = renders.find((render) => render.status === 'rendering');
@@ -119,6 +124,25 @@ export function ExportPanel(props: {
             : 'The final render becomes available after the project is approved.'}
         </p>
       )}
+      {renders
+        .filter((render) => render.status === 'rendering')
+        .map((render) => (
+          <div key={render.renderId} className="rounded-lg border border-[#2a4568] bg-[#0f1c30] p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wide text-[#9fb2c8]">Render in progress</span>
+              <button
+                type="button"
+                onClick={() => void cancelRender(render.renderId)}
+                className="rounded bg-[#1a0f1f] px-2 py-1 text-xs font-semibold text-[#fb7185] hover:bg-[#2a1520]"
+              >
+                Cancel
+              </button>
+            </div>
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#0a1526]">
+              <div className="h-full rounded-full bg-[#59d5e0]" style={{width: `${Math.max(2, render.progress)}%`}} />
+            </div>
+          </div>
+        ))}
     </div>
   );
 }

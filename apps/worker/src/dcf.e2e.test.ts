@@ -1,5 +1,5 @@
 import {beforeAll, describe, expect, it} from 'vitest';
-import {and, eq} from 'drizzle-orm';
+import {and, eq, sql} from 'drizzle-orm';
 import {
   createDatabaseClient,
   workspaces,
@@ -191,6 +191,26 @@ describe('DCF end-to-end acceptance', () => {
 
     // The pipeline continues automatically to a reviewable preview.
     await waitForProjectStatus(projectId, 'READY_FOR_REVIEW', 900_000);
+
+    // Identical manifests are reused: re-running the preview does not render
+    // again and records a reuse usage event.
+    const previewsBefore = await db.select().from(renders).where(eq(renders.projectId, projectId));
+    await deps.queue.enqueue({
+      jobId: `${projectId}-preview-reuse-check`,
+      workspaceId: fixtureWorkspaceId,
+      projectId,
+      operation: 'GENERATE_PREVIEW',
+      inputHash: '7'.repeat(64),
+      idempotencyKey: `e2e|${projectId}|preview-reuse`,
+      payload: {workspaceId: fixtureWorkspaceId, projectId},
+    });
+    await drainJobs(projectId, 480_000);
+    const previewsAfter = await db.select().from(renders).where(eq(renders.projectId, projectId));
+    expect(previewsAfter.filter((row) => row.kind === 'PREVIEW').length).toBe(
+      previewsBefore.filter((row) => row.kind === 'PREVIEW').length,
+    );
+    const reuseEvents = await db.execute(sql`select count(*)::int as count from public.usage_events where operation = 'render:preview:reused' and project_id = ${projectId}`);
+    expect(Number((reuseEvents[0] as {count?: number})?.count ?? 0)).toBeGreaterThan(0);
 
     const calcSceneRow = (await db
       .select()

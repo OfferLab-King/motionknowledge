@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {eq} from 'drizzle-orm';
+import {and, eq} from 'drizzle-orm';
 import {projects, renders} from '@motionknowledge/database';
 import {stableHash} from '@motionknowledge/schemas/hash';
 import {RenderManifestV1} from '@motionknowledge/schemas';
@@ -36,6 +36,7 @@ export async function handleGeneratePreview(
     styleVersion: project.styleVersion ?? 1,
   });
   RenderManifestV1.parse(manifest);
+  const manifestHash = stableHash(manifest);
 
   const {ArtifactRepositoryImpl} = await import('@motionknowledge/database');
   const repo = new ArtifactRepositoryImpl(deps.db);
@@ -50,6 +51,32 @@ export async function handleGeneratePreview(
 
   const scratch = await mkdtemp(join(tmpdir(), 'mk-preview-'));
   const outputPath = join(scratch, 'preview.mp4');
+
+  // Reuse: an identical manifest (same scenes, style, audio, timing) was
+  // already rendered — skip the render and the QA round-trip.
+  const previousPreviews = await deps.db
+    .select()
+    .from(renders)
+    .where(and(eq(renders.projectId, payload.projectId), eq(renders.kind, 'PREVIEW')))
+    .orderBy(renders.createdAt);
+  const reusable = [...previousPreviews].reverse().find((row) => row.status === 'succeeded' && row.manifestHash === manifestHash);
+  if (reusable) {
+    // Identical render → identical QA; the previous QA_RESULT still applies.
+    await deps.usage.record({
+      workspaceId: payload.workspaceId,
+      projectId: payload.projectId,
+      provider: 'remotion',
+      model: 'h264',
+      operation: 'render:preview:reused',
+      outputUnits: '0',
+      providerCostUsd: '0',
+      computeDurationMs: 0,
+      correlationId: input.envelope.idempotencyKey,
+    });
+    await markJobSucceeded(deps.db, input.envelope.idempotencyKey);
+    return;
+  }
+
   const renderRow = (
     await deps.db
       .insert(renders)
@@ -59,6 +86,7 @@ export async function handleGeneratePreview(
         kind: 'PREVIEW',
         status: 'rendering',
         progress: 0,
+        manifestHash,
         providerCostUsd: '0',
       })
       .returning()
@@ -106,6 +134,6 @@ export async function handleGeneratePreview(
     correlationId: input.envelope.idempotencyKey,
   });
 
-  await enqueueNext(deps, payload.workspaceId, payload.projectId, 'RUN_QA', {manifestHash: manifest.inputHash});
+  await enqueueNext(deps, payload.workspaceId, payload.projectId, 'RUN_QA', {manifestHash});
   await markJobSucceeded(deps.db, input.envelope.idempotencyKey);
 }

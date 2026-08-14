@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {eq} from 'drizzle-orm';
+import {and, eq} from 'drizzle-orm';
 import {projects, renders} from '@motionknowledge/database';
 import {stableHash} from '@motionknowledge/schemas/hash';
 import {RenderManifestV1, CaptionTrackV1, ScriptV1, YouTubeMetadataV1, RenderResultV1} from '@motionknowledge/schemas';
@@ -71,6 +71,37 @@ export async function handleRenderFinal(
 
   const scratch = await mkdtemp(join(tmpdir(), 'mk-final-'));
   const videoPath = join(scratch, 'final.mp4');
+
+  // Reuse: an identical final manifest was already rendered successfully.
+  const manifestHash = stableHash(manifest);
+  const previousFinals = await deps.db
+    .select()
+    .from(renders)
+    .where(and(eq(renders.projectId, payload.projectId), eq(renders.kind, 'FINAL')))
+    .orderBy(renders.createdAt);
+  const reusable = [...previousFinals].reverse().find((row) => row.status === 'succeeded' && row.manifestHash === manifestHash);
+  if (reusable) {
+    await deps.db
+      .update(projects)
+      .set({latestRenderResultId: reusable.id})
+      .where(eq(projects.id, payload.projectId));
+    await deps.usage.record({
+      workspaceId: payload.workspaceId,
+      projectId: payload.projectId,
+      provider: 'remotion',
+      model: 'h264',
+      operation: 'render:final:reused',
+      outputUnits: '0',
+      providerCostUsd: '0',
+      computeDurationMs: 0,
+      correlationId: input.envelope.idempotencyKey,
+    });
+    await transitionProject(deps.db, payload.projectId, payload.workspaceId, 'APPROVED', 'RENDERING');
+    await transitionProject(deps.db, payload.projectId, payload.workspaceId, 'RENDERING', 'COMPLETE');
+    await markJobSucceeded(deps.db, input.envelope.idempotencyKey);
+    return;
+  }
+
   const renderRow = (
     await deps.db
       .insert(renders)
@@ -80,6 +111,7 @@ export async function handleRenderFinal(
         kind: 'FINAL',
         status: 'rendering',
         progress: 0,
+        manifestHash,
         providerCostUsd: '0',
       })
       .returning()

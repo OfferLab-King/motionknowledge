@@ -4,6 +4,7 @@ import {getSessionUser} from '../../../../../lib/supabase/auth';
 import {getServiceDb} from '../../../../../lib/db';
 import {getWorkspaceMemberships} from '../../../../../services/projects';
 import {getActiveArtifact, listJobs, listScenes} from '../../../../../services/artifacts';
+import {stableHash} from '@motionknowledge/schemas/hash';
 import {audioAssets} from '@motionknowledge/database';
 import {listProjectRenders} from '../../../../../services/downloads';
 import type {LessonPlan, Script, Storyboard, QAResult} from '@motionknowledge/schemas';
@@ -39,6 +40,11 @@ export async function GET(_request: Request, {params}: {params: Promise<{project
   const audioRows = await db.select({model: audioAssets.model, provider: audioAssets.provider}).from(audioAssets).where(eq(audioAssets.projectId, projectId)).limit(1);
   const sceneList = await listScenes(db, projectId);
   const renders = await listProjectRenders(db, projectId);
+  const sourceRows = await db.select().from((await import('@motionknowledge/database')).sources).where(eq((await import('@motionknowledge/database')).sources.projectId, projectId)).orderBy((await import('@motionknowledge/database')).sources.createdAt);
+  const renderManifest = await getActiveArtifact<Record<string, unknown>>(db, projectId, workspaceId, 'RENDER_MANIFEST');
+  const manifestHash = renderManifest ? stableHash(renderManifest) : null;
+  const latestPreview = [...renders].reverse().find((row) => row.kind === 'PREVIEW' && row.status === 'succeeded' && row.mp4Key);
+  const previewStale = Boolean(manifestHash && latestPreview && latestPreview.manifestHash !== manifestHash);
 
   const stages: StageStatus[] = [
     {
@@ -116,12 +122,11 @@ export async function GET(_request: Request, {params}: {params: Promise<{project
     },
     finalRenderStatus: renders.at(-1)?.status ?? null,
     renderProgress: renders.filter((render) => render.status === 'rendering').at(-1)?.progress ?? null,
-    latestPreview: (() => {
-      const preview = [...renders].reverse().find((render) => render.kind === 'PREVIEW' && render.status === 'succeeded' && render.mp4Key);
-      return preview
-        ? {renderId: preview.id, durationSeconds: preview.durationSeconds}
-        : null;
-    })(),
+    latestPreview: latestPreview
+      ? {renderId: String(latestPreview.id), durationSeconds: latestPreview.durationSeconds}
+      : null,
+    previewStale,
+    sources: sourceRows.map((source) => ({id: String(source.id), title: source.title, kind: source.kind, status: source.status, failureReason: source.failureReason})),
     narrationModel: audioRows[0]?.model ?? null,
     qa: qaResult
       ? {

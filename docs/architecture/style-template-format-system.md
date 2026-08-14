@@ -257,7 +257,26 @@ index; use the `./style` and `./catalog` subpaths instead.
   smoke test; the CI verify job now renders one frame per style (16:9 and
   9:16) in a real browser.
 
-## 13. Migration risks
+## 13. Phase 6: economics and operational depth
+
+- **Render reuse**: `renders.manifest_hash` stores the canonical manifest hash
+  each render was produced from. Preview and final handlers skip identical
+  re-renders (and skip the QA round-trip, since identical output implies an
+  identical QA result), recording `render:preview:reused` /
+  `render:final:reused` usage events.
+- **Preview staleness**: the status API compares the active manifest with the
+  latest preview's hash; the project page warns when scenes or narration
+  changed after the last preview.
+- **Render cancellation**: queued render jobs can be cancelled
+  (`POST .../renders/[id]/cancel`) — the pg-boss job is cancelled by its
+  singleton key, the `generation_jobs` row and the `renders` row are marked
+  `cancelled`, and the project status is restored (APPROVED for final,
+  READY_FOR_REVIEW for preview). Running renders refuse cancellation.
+- **Source lifecycle**: the project page lists sources with their statuses
+  (PENDING/PROCESSED/FAILED + reason) and a Retry action for failed URL
+  sources (re-enqueues `INGEST_SOURCE`).
+
+## 14. Migration risks
 
 - Old persisted `RENDER_MANIFEST` artifacts parse because new token fields have
   defaults and the old `theme` shape is a strict subset.
