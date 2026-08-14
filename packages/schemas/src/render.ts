@@ -7,6 +7,7 @@ export const RenderSceneV1 = z.object({
   sceneId: z.string().min(1),
   title: z.string().min(1),
   index: z.number().int().nonnegative(),
+  chapterId: z.string().default(''),
   startFrame: z.number().int().nonnegative(),
   durationInFrames: z.number().int().positive(),
   fps: z.number().positive(),
@@ -35,6 +36,7 @@ export const RenderManifestV1 = z.object({
   totalDurationInFrames: z.number().int().positive(),
   theme: ThemeTokenSchema,
   style: StyleIdentitySchema.default({styleId: 'signature', styleVersion: 1}),
+  burnedCaptions: z.boolean().default(true),
   scenes: z.array(RenderSceneV1).min(1),
   audioTracks: z.array(
     z.object({

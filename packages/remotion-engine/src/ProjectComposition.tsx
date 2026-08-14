@@ -1,4 +1,4 @@
-import {getVisualDefinition, resolveSceneTheme, resolveTheme, type Theme} from '@motionknowledge/visual-library';
+import {getVisualDefinition, resolveSceneTheme, resolveTheme, BurnedCaptions, type Theme} from '@motionknowledge/visual-library';
 import {visualRouter} from '@motionknowledge/visual-router';
 import {AbsoluteFill, Audio, Sequence} from 'remotion';
 import type {RenderManifest, RenderScene} from '@motionknowledge/schemas';
@@ -145,6 +145,12 @@ export function ProjectComposition(props: ProjectCompositionProps) {
         <Sequence key={scene.sceneVersionId} from={scene.startFrame} durationInFrames={scene.durationInFrames} premountFor={30}>
           <SceneWithAudio audioUrl={scene.narrationAudioKey ? props.audioUrls?.[scene.narrationAudioKey] : undefined}>
             <SceneRenderer scene={scene} index={index} manifest={manifest} />
+            {manifest.burnedCaptions && scene.captionSegments.length > 0 ? (
+              <BurnedCaptions
+                theme={resolveSceneTheme(manifest.theme as Theme, scene.styleOverride ?? undefined, undefined)}
+                segments={scene.captionSegments}
+              />
+            ) : null}
           </SceneWithAudio>
         </Sequence>
       ))}

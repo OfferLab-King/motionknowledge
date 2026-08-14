@@ -4,3 +4,4 @@ export * from './quantitative';
 export * from './technical';
 export * from './relationships';
 export * from './assessment';
+export * from './captions';

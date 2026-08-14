@@ -106,6 +106,20 @@ export function EditorShell(props: {
     const swap = index + direction;
     if (index < 0 || swap < 0 || swap >= ordered.length) return;
     [ordered[index], ordered[swap]] = [ordered[swap]!, ordered[index]!];
+    await persistOrder(ordered);
+  }
+
+  async function reorderScene(activeId: string, overId: string) {
+    const ordered = scenes.map((item) => item.scene.id);
+    const from = ordered.indexOf(activeId);
+    const to = ordered.indexOf(overId);
+    if (from < 0 || to < 0 || from === to) return;
+    ordered.splice(from, 1);
+    ordered.splice(to, 0, activeId);
+    await persistOrder(ordered);
+  }
+
+  async function persistOrder(ordered: string[]) {
     await withBusy(async () => {
       await fetch(`/api/projects/${projectId}/scenes/reorder`, {
         method: 'POST',
@@ -153,6 +167,7 @@ export function EditorShell(props: {
           selectedSceneId={selectedSceneId}
           onSelect={setSelectedSceneId}
           onMove={moveScene}
+          onReorder={reorderScene}
           onDuplicate={duplicateScene}
           onDelete={deleteScene}
           busy={busy}

@@ -7,6 +7,7 @@ import {listJobs} from '../../../../services/artifacts';
 import {StyleSwitcher} from '../../../../components/project/StyleSwitcher';
 import {ProjectActions} from '../../../../components/project/ProjectActions';
 import {PreviewPlayback} from '../../../../components/project/PreviewPlayback';
+import {CaptionsToggle} from '../../../../components/project/CaptionsToggle';
 import {getStyleDefinition} from '@motionknowledge/visual-library/style';
 import {renders as rendersTable} from '@motionknowledge/database';
 import {eq} from 'drizzle-orm';
@@ -41,6 +42,7 @@ export default async function ProjectPage({params}: {params: Promise<{projectId:
         </div>
         <div className="flex items-center gap-2">
           <StyleSwitcher projectId={projectId} styleId={project.styleId ?? 'signature'} />
+          <CaptionsToggle projectId={projectId} burnedCaptions={project.burnedCaptions ?? true} />
           <ProjectActions projectId={projectId} title={project.title} />
         </div>
       </div>

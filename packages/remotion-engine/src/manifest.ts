@@ -20,6 +20,7 @@ export interface RenderManifestInput {
   fps: 30;
   styleId?: string;
   styleVersion?: number;
+  burnedCaptions?: boolean;
   audioUrlFor?: (assetKey: string) => string | null;
 }
 
@@ -43,6 +44,7 @@ export function buildRenderManifest(input: RenderManifestInput): RenderManifest 
       sceneId: scene.id,
       title: scene.title,
       index: scene.index,
+      chapterId: scene.chapterId,
       startFrame,
       durationInFrames,
       fps,
@@ -65,6 +67,7 @@ export function buildRenderManifest(input: RenderManifestInput): RenderManifest 
     totalDurationInFrames: cursor,
     theme,
     style: {styleId, styleVersion},
+    burnedCaptions: input.burnedCaptions ?? true,
     scenes: renderScenes,
     audioTracks: renderScenes
       .filter((scene) => scene.narrationAudioKey)

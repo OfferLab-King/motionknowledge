@@ -13,14 +13,17 @@ const FILTERS = [
   {key: 'complete', label: 'Complete', matches: (status: string) => status === 'COMPLETE'},
 ] as const;
 
-export default async function DashboardPage({searchParams}: {searchParams: Promise<{status?: string}>}) {
+export default async function DashboardPage({searchParams}: {searchParams: Promise<{status?: string; q?: string}>}) {
   const params = await searchParams;
   const user = await getSessionUser();
   const db = getServiceDb();
   const allProjects = user ? await listProjectsForUser(user.id, db) : [];
   const filterKey = params.status ?? 'all';
   const filter = FILTERS.find((item) => item.key === filterKey) ?? FILTERS[0]!;
-  const projects = allProjects.filter((project) => filter.matches(project.status));
+  const query = (params.q ?? '').trim().toLowerCase();
+  const projects = allProjects.filter(
+    (project) => filter.matches(project.status) && (query.length === 0 || project.title.toLowerCase().includes(query)),
+  );
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -33,7 +36,20 @@ export default async function DashboardPage({searchParams}: {searchParams: Promi
           New video
         </Link>
       </div>
-      <div className="mb-4 flex gap-1">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <form action="/dashboard" className="flex items-center gap-2">
+          <input
+            name="q"
+            defaultValue={query}
+            aria-label="Search projects"
+            placeholder="Search projects…"
+            className="w-56 rounded-lg border border-[#2a4568] bg-[#10213a] px-3 py-1.5 text-sm text-[#f8fafc] outline-none placeholder:text-[#64748b] focus:border-[#59d5e0]"
+          />
+          <button type="submit" className="rounded-lg bg-[#10213a] px-3 py-1.5 text-xs font-semibold text-[#59d5e0] hover:bg-[#1a3050]">
+            Search
+          </button>
+        </form>
+        <div className="flex gap-1">
         {FILTERS.map((item) => (
           <Link
             key={item.key}
@@ -45,6 +61,7 @@ export default async function DashboardPage({searchParams}: {searchParams: Promi
             {item.label}
           </Link>
         ))}
+        </div>
       </div>
       {projects.length === 0 ? (
         <Card>

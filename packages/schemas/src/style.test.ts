@@ -185,6 +185,7 @@ describe('render manifest with style identity', () => {
       totalDurationInFrames: 150,
       theme: ThemeTokenSchema.parse({...baseTheme, visualLanguage: 'minimal'}),
       style: {styleId: 'minimal', styleVersion: 1},
+      burnedCaptions: false,
       scenes: [
         {
           sceneVersionId: 'sv-1',
@@ -207,6 +208,7 @@ describe('render manifest with style identity', () => {
       inputHash: 'c'.repeat(64),
     });
     expect(manifest.style.styleId).toBe('minimal');
+    expect(manifest.burnedCaptions).toBe(false);
     expect(manifest.scenes[0]!.styleOverride.styleId).toBe('business');
     expect(RenderManifestV1.parse(JSON.parse(JSON.stringify(manifest)))).toEqual(manifest);
   });

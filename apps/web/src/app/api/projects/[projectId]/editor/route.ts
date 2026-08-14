@@ -49,6 +49,7 @@ export async function GET(request: Request, {params}: {params: Promise<{projectI
         fps: 30,
         styleId: project.styleId ?? 'signature',
         styleVersion: project.styleVersion ?? 1,
+        burnedCaptions: project.burnedCaptions ?? true,
         audioUrlFor: (key) => `/api/objects/${key}`,
       })
     : null;

@@ -401,3 +401,17 @@ function kindForFile(name: string, bytes: Uint8Array): 'text' | 'pdf' | 'docx' |
   if (extension === 'txt') return 'text';
   return 'file';
 }
+
+/** Toggle burned (on-video) captions for a project. */
+export async function setBurnedCaptionsAction(projectId: string, burnedCaptions: boolean): Promise<void> {
+  const user = await getSessionUser();
+  if (!user) redirect('/login');
+  const db = getServiceDb();
+  const memberships = await getWorkspaceMemberships(user.id, db);
+  const workspaceId = memberships[0]?.workspaceId;
+  if (!workspaceId) throw new Error('No workspace');
+  const project = await db.query.projects.findFirst({where: eq(projectsTable.id, projectId)});
+  if (!project || String(project.workspaceId) !== workspaceId) throw new Error('Project not found');
+  await db.update(projectsTable).set({burnedCaptions}).where(eq(projectsTable.id, projectId));
+  revalidatePath(`/projects/${projectId}`);
+}

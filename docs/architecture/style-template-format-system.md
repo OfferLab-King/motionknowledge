@@ -276,7 +276,20 @@ index; use the `./style` and `./catalog` subpaths instead.
   (PENDING/PROCESSED/FAILED + reason) and a Retry action for failed URL
   sources (re-enqueues `INGEST_SOURCE`).
 
-## 14. Migration risks
+## 14. Phase 7: viewing and polish
+
+- **Burned captions**: captions are rendered into the video itself, styled by
+  the style's caption treatment tokens (pill / marker / block / flat). The
+  `BurnedCaptions` component is frame-driven and deterministic; a project
+  toggle (`projects.burned_captions`, manifest `burnedCaptions`) controls it.
+- **Drag-and-drop scene reordering** in the scene editor (@dnd-kit), alongside
+  the keyboard/button arrows.
+- **Dashboard search** (title filter via `?q=`).
+- **MP4 chapter metadata**: the final render re-muxes chapter markers derived
+  from the manifest (script chapter titles, scene boundaries) with `-c copy`
+  (`injectChapterMetadata`, `probeChapters` for verification).
+
+## 15. Migration risks
 
 - Old persisted `RENDER_MANIFEST` artifacts parse because new token fields have
   defaults and the old `theme` shape is a strict subset.

@@ -64,3 +64,13 @@ export async function detectAudioLevels(path: string): Promise<{maxVolumeDb: num
     meanVolumeDb: meanMatch ? Number(meanMatch[1]) : -Infinity,
   };
 }
+
+export async function probeChapters(path: string): Promise<Array<{title: string; startSeconds: number; endSeconds: number}>> {
+  const {stdout} = await execFileAsync('ffprobe', ['-v', 'error', '-show_chapters', '-of', 'json', path]);
+  const parsed = JSON.parse(stdout) as {chapters?: Array<{tags?: {title?: string}; start_time?: string; end_time?: string}>};
+  return (parsed.chapters ?? []).map((chapter) => ({
+    title: chapter.tags?.title ?? '',
+    startSeconds: Number(chapter.start_time ?? 0),
+    endSeconds: Number(chapter.end_time ?? 0),
+  }));
+}

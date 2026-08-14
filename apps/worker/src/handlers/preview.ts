@@ -34,6 +34,7 @@ export async function handleGeneratePreview(
     fps: deps.config.fps,
     styleId: project.styleId ?? 'signature',
     styleVersion: project.styleVersion ?? 1,
+    burnedCaptions: project.burnedCaptions ?? true,
   });
   RenderManifestV1.parse(manifest);
   const manifestHash = stableHash(manifest);

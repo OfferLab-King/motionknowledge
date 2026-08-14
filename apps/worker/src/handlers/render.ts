@@ -41,6 +41,7 @@ export async function handleRenderFinal(
     fps: deps.config.fps,
     styleId: project.styleId ?? previewManifest.style?.styleId ?? 'signature',
     styleVersion: project.styleVersion ?? previewManifest.style?.styleVersion ?? 1,
+    burnedCaptions: project.burnedCaptions ?? previewManifest.burnedCaptions ?? true,
   });
   RenderManifestV1.parse(manifest);
 
@@ -126,9 +127,21 @@ export async function handleRenderFinal(
   const {attachNarration} = await import('../lib/narration');
   const finalVideoPath = join(scratch, 'final-narrated.mp4');
   await attachNarration(deps, manifest, videoPath, finalVideoPath);
-  const videoBytes = new Uint8Array(await readFile(finalVideoPath));
+  const chapteredVideoPath = join(scratch, 'final-chaptered.mp4');
+  const chapterTitleById = new Map((script?.chapters ?? []).map((chapter) => [chapter.id, chapter.title]));
+  const {injectChapterMetadata} = await import('@motionknowledge/audio');
+  await injectChapterMetadata({
+    videoPath: finalVideoPath,
+    outputPath: chapteredVideoPath,
+    chapters: manifest.scenes.map((scene) => ({
+      title: chapterTitleById.get(scene.chapterId) ?? scene.title,
+      startMs: Math.round((scene.startFrame / manifest.fps) * 1000),
+      endMs: Math.round(((scene.startFrame + scene.durationInFrames) / manifest.fps) * 1000),
+    })),
+  });
+  const videoBytes = new Uint8Array(await readFile(chapteredVideoPath));
   const videoSha256 = sha256Hex(videoBytes);
-  const probe = await probeVideo(finalVideoPath);
+  const probe = await probeVideo(chapteredVideoPath);
 
   const videoKey = `${payload.workspaceId}/${payload.projectId}/renders/final/${videoSha256.slice(0, 2)}/video.mp4`;
   await deps.storage.put({key: videoKey, body: videoBytes, contentType: 'video/mp4', sha256: videoSha256});

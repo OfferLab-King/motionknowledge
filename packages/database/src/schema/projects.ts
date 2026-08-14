@@ -1,4 +1,4 @@
-import {pgTable, uuid, text, integer, timestamp} from 'drizzle-orm/pg-core';
+import {pgTable, uuid, text, integer, timestamp, boolean} from 'drizzle-orm/pg-core';
 import {workspaces} from './tenancy';
 import {sql} from 'drizzle-orm';
 
@@ -25,6 +25,7 @@ export const projects = pgTable('projects', {
   styleId: text('style_id').notNull().default('signature'),
   styleVersion: integer('style_version').notNull().default(1),
   aspectRatio: text('aspect_ratio').notNull().default('16:9'),
+  burnedCaptions: boolean('burned_captions').notNull().default(true),
   status: text('status').notNull().default('DRAFT'),
   latestPreviewRenderId: uuid('latest_preview_render_id'),
   latestRenderResultId: uuid('latest_render_result_id'),

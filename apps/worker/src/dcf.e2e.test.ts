@@ -18,7 +18,7 @@ import {sha256Hex, hashText} from '@motionknowledge/assets';
 import {buildWorkerDeps, attachQueue, type WorkerDeps} from './deps';
 import {startBoss, PgBossJobQueue, JOB_NAMES} from '@motionknowledge/jobs';
 import {attachBossHandlers} from './register';
-import {probeVideo} from '@motionknowledge/remotion-engine';
+import {probeVideo, probeChapters} from '@motionknowledge/remotion-engine';
 import {readFile, writeFile, mkdir} from 'node:fs/promises';
 import {join} from 'node:path';
 import {DCF_TOPIC, DCF_SOURCE_TEXT} from '@motionknowledge/testkit';
@@ -263,6 +263,10 @@ describe('DCF end-to-end acceptance', () => {
 
     const render = await renderApprovedProject(projectId);
     expect(await probeVideo(render.mp4Path)).toMatchObject({videoCodec: 'h264'});
+    const chapters = await probeChapters(render.mp4Path);
+    expect(chapters.length).toBeGreaterThanOrEqual(3);
+    expect(chapters[0]!.title.length).toBeGreaterThan(0);
+    expect(chapters[0]!.startSeconds).toBe(0);
     const srt = await readFile(render.srtPath, 'utf8');
     expect(srt).toContain('discount rate');
     expect(srt).toContain('-->');
