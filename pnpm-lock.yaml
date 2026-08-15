@@ -31,10 +31,10 @@ importers:
         version: link:../../packages/schemas
       '@remotion/bundler':
         specifier: 4.0.508
-        version: 4.0.508(@swc/helpers@0.5.15)(postcss@8.5.26)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 4.0.508(@swc/helpers@0.5.15)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/cli':
         specifier: 4.0.508
-        version: 4.0.508(@swc/helpers@0.5.15)(postcss@8.5.26)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3)
+        version: 4.0.508(@swc/helpers@0.5.15)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3)
       '@remotion/renderer':
         specifier: 4.0.508
         version: 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -123,6 +123,9 @@ importers:
       '@motionknowledge/visual-router':
         specifier: workspace:*
         version: link:../../packages/visual-router
+      '@remotion/google-fonts':
+        specifier: 4.0.508
+        version: 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/player':
         specifier: 4.0.508
         version: 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -153,6 +156,9 @@ importers:
       remotion:
         specifier: 4.0.508
         version: 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      stripe:
+        specifier: ^22.5.0
+        version: 22.5.0(@types/node@24.10.1)
       zod:
         specifier: 4.4.3
         version: 4.4.3
@@ -511,7 +517,10 @@ importers:
         version: link:../visual-router
       '@remotion/bundler':
         specifier: 4.0.508
-        version: 4.0.508(@swc/helpers@0.5.15)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 4.0.508(@swc/helpers@0.5.15)(postcss@8.5.26)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@remotion/google-fonts':
+        specifier: 4.0.508
+        version: 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/renderer':
         specifier: 4.0.508
         version: 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -715,6 +724,9 @@ importers:
       '@motionknowledge/schemas':
         specifier: workspace:*
         version: link:../schemas
+      '@remotion/google-fonts':
+        specifier: 4.0.508
+        version: 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -2009,6 +2021,9 @@ packages:
     resolution: {integrity: sha512-odYJig/S3MVgbRPKrdf8ew2bswVXloPNWw7G3zfFH8eu5BrA9uBTfYwtcbQcLrR2/RUQpcWd2v66bpbaShIOWA==}
     cpu: [x64]
     os: [win32]
+
+  '@remotion/google-fonts@4.0.508':
+    resolution: {integrity: sha512-j6fW/hQNcBsDz//aBh4igUKCYKYdr14Gwl0AEhagUJyf8NmD6wit/0XMY5/sN9AVSCwURirMymkqHNg+AiVbJQ==}
 
   '@remotion/licensing@4.0.508':
     resolution: {integrity: sha512-S9w6lckixF0tYc3wcnh1zLACPl0AgG9v/QGOYqkkaZX/p+F86202+YMWKAHdMiCQPEYntTfCgIfnqucGuLoWeA==}
@@ -3973,6 +3988,15 @@ packages:
     resolution: {integrity: sha512-BrpvfNAE3dcvq7ll3xVumzjKjZQ5tI1sEUIKr3Uoks0XUl45St3FlatVqef9prk4jRDzhW6WZg+3bk93y6pLjA==}
     engines: {node: '>=6'}
 
+  stripe@22.5.0:
+    resolution: {integrity: sha512-QVwMwriC0bbySx6R4dpsvJ0W//GojC1kwWVS6rPSoVqDUIZX4Hy3TaUrd2AZeXEAaKbfWIjQjvo3vKAReHZ0vQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
   strtok3@10.3.5:
     resolution: {integrity: sha512-ki4hZQfh5rX0QDLLkOCj+h+CVNkqmp/CMf8v8kZpkNVK6jGQooMytqzLZYUVYIZcFZ6yDB70EfD8POcFXiF5oA==}
     engines: {node: '>=18'}
@@ -5324,15 +5348,15 @@ snapshots:
 
   '@remotion/captions@4.0.508': {}
 
-  '@remotion/cli@4.0.508(@swc/helpers@0.5.15)(postcss@8.5.26)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3)':
+  '@remotion/cli@4.0.508(@swc/helpers@0.5.15)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3)':
     dependencies:
       '@babel/parser': 7.24.1
-      '@remotion/bundler': 4.0.508(@swc/helpers@0.5.15)(postcss@8.5.26)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@remotion/bundler': 4.0.508(@swc/helpers@0.5.15)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/media-utils': 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/player': 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/renderer': 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/studio': 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@remotion/studio-server': 4.0.508(@swc/helpers@0.5.15)(postcss@8.5.26)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3)
+      '@remotion/studio-server': 4.0.508(@swc/helpers@0.5.15)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3)
       '@remotion/studio-shared': 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       dotenv: 17.3.1
       minimist: 1.2.6
@@ -5381,6 +5405,13 @@ snapshots:
 
   '@remotion/compositor-win32-x64-msvc@4.0.508':
     optional: true
+
+  '@remotion/google-fonts@4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      remotion: 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+    transitivePeerDependencies:
+      - react
+      - react-dom
 
   '@remotion/licensing@4.0.508': {}
 
@@ -5437,11 +5468,11 @@ snapshots:
 
   '@remotion/studio-protocol@4.0.508': {}
 
-  '@remotion/studio-server@4.0.508(@swc/helpers@0.5.15)(postcss@8.5.26)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3)':
+  '@remotion/studio-server@4.0.508(@swc/helpers@0.5.15)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3)':
     dependencies:
       '@babel/parser': 7.24.1
       '@babel/types': 7.24.0
-      '@remotion/bundler': 4.0.508(@swc/helpers@0.5.15)(postcss@8.5.26)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@remotion/bundler': 4.0.508(@swc/helpers@0.5.15)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/renderer': 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/studio-codemods': 4.0.508(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@remotion/studio-protocol': 4.0.508
@@ -7330,6 +7361,10 @@ snapshots:
       ansi-regex: 5.0.1
 
   strip-final-newline@2.0.0: {}
+
+  stripe@22.5.0(@types/node@24.10.1):
+    optionalDependencies:
+      '@types/node': 24.10.1
 
   strtok3@10.3.5:
     dependencies:

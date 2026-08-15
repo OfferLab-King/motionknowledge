@@ -32,6 +32,7 @@
     "@motionknowledge/usage": "workspace:*",
     "@motionknowledge/visual-library": "workspace:*",
     "@motionknowledge/visual-router": "workspace:*",
+    "@remotion/google-fonts": "4.0.508",
     "@remotion/player": "4.0.508",
     "@supabase/ssr": "0.12.4",
     "@supabase/supabase-js": "2.112.3",
@@ -42,16 +43,17 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "remotion": "4.0.508",
+    "stripe": "^22.5.0",
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@motionknowledge/testkit": "workspace:*",
     "@playwright/test": "1.62.1",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "24.10.1",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "tailwindcss": "4.3.3",
-    "typescript": "5.9.3",
-    "@motionknowledge/testkit": "workspace:*"
+    "typescript": "5.9.3"
   }
 }

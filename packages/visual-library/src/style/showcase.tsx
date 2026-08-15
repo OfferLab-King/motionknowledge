@@ -7,6 +7,7 @@ import {ProcessFlow} from '../components/explanation';
 import {NumberCounter, LineChart} from '../components/quantitative';
 import {KeyTakeaway} from '../components/typography';
 import {SafeArea} from '../layout';
+import {loadProjectFonts} from '../fonts';
 
 export const SHOWCASE_FPS = 30;
 export const SHOWCASE_DURATION_IN_FRAMES = 240;

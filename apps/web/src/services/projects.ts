@@ -500,3 +500,21 @@ export async function removeMemberAction(workspaceId: string, userId: string): P
     .where(and(eq(workspaceMemberships.workspaceId, workspaceId), eq(workspaceMemberships.userId, userId)));
   revalidatePath('/', 'layout');
 }
+
+/** Update per-project video flags (captions, music bed, brand mark). */
+export async function updateProjectFlagsAction(projectId: string, flags: {
+  burnedCaptions?: boolean;
+  musicBed?: boolean;
+  brandMark?: boolean;
+}): Promise<void> {
+  const user = await getSessionUser();
+  if (!user) redirect('/login');
+  const db = getServiceDb();
+  const memberships = await getWorkspaceMemberships(user.id, db);
+  const workspaceId = memberships[0]?.workspaceId;
+  if (!workspaceId) throw new Error('No workspace');
+  const project = await db.query.projects.findFirst({where: eq(projectsTable.id, projectId)});
+  if (!project || String(project.workspaceId) !== workspaceId) throw new Error('Project not found');
+  await db.update(projectsTable).set(flags).where(eq(projectsTable.id, projectId));
+  revalidatePath(`/projects/${projectId}`);
+}

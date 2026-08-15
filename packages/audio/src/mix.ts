@@ -78,13 +78,15 @@ export async function attachNarrationToVideo(input: {
   narrationTracks: Array<{path: string; offsetMs: number}>;
   outputPath: string;
   videoDurationSeconds?: number;
+  musicTrackPath?: string;
+  musicRelativeDb?: number;
 }): Promise<{path: string; durationSeconds: number}> {
-  if (input.narrationTracks.length === 0) {
+  if (input.narrationTracks.length === 0 && !input.musicTrackPath) {
     await import('node:fs/promises').then(({copyFile}) => copyFile(input.videoPath, input.outputPath));
     const probe = await probeAudio(input.outputPath);
     return {path: input.outputPath, durationSeconds: probe.durationSeconds};
   }
-  const inputs = [input.videoPath, ...input.narrationTracks.map((track) => track.path)];
+  const inputs = [input.videoPath, ...input.narrationTracks.map((track) => track.path), ...(input.musicTrackPath ? [input.musicTrackPath] : [])];
   const filters: string[] = [];
   const mixedLabels: string[] = [];
   input.narrationTracks.forEach((track, index) => {
@@ -96,14 +98,27 @@ export async function attachNarrationToVideo(input: {
     mixedLabels.push(label);
   });
   const loud = loudnormPlan(-16);
-  let mixedMap: string;
+  let mixedMap: string | null = null;
   if (mixedLabels.length > 1) {
     filters.push(`${mixedLabels.join('')}amix=inputs=${mixedLabels.length}:normalize=0[mixed]`);
     mixedMap = '[mixed]';
-  } else {
+  } else if (mixedLabels.length === 1) {
     mixedMap = mixedLabels[0]!;
   }
-  filters.push(`${mixedMap}loudnorm=I=${loud.targetLufs}:TP=-1.5:LRA=11[out]`);
+  if (input.musicTrackPath) {
+    const musicIndex = inputs.length - 1;
+    const duckVolume = Math.pow(10, (input.musicRelativeDb ?? -14) / 20);
+    filters.push(`[${musicIndex}:a]aresample=48000,volume=${duckVolume.toFixed(4)}[music]`);
+    if (mixedMap) {
+      filters.push(`${mixedMap}[music]sidechaincompress=threshold=0.05:ratio=6:attack=20:release=400[ducked]`);
+      filters.push(`[ducked]loudnorm=I=${loud.targetLufs}:TP=-1.5:LRA=11[out]`);
+    } else {
+      filters.push(`[music]loudnorm=I=${loud.targetLufs}:TP=-1.5:LRA=11[out]`);
+    }
+  } else {
+    filters.push(`${mixedMap}loudnorm=I=${loud.targetLufs}:TP=-1.5:LRA=11[out]`);
+  }
+  void mixedMap;
   const args = [
     '-y',
     ...inputs.flatMap((path) => ['-i', path]),

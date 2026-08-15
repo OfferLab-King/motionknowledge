@@ -289,7 +289,7 @@ index; use the `./style` and `./catalog` subpaths instead.
   from the manifest (script chapter titles, scene boundaries) with `-c copy`
   (`injectChapterMetadata`, `probeChapters` for verification).
 
-## 15. Migration risks
+## 18. Migration risks
 
 - Old persisted `RENDER_MANIFEST` artifacts parse because new token fields have
   defaults and the old `theme` shape is a strict subset.
@@ -308,3 +308,31 @@ index; use the `./style` and `./catalog` subpaths instead.
 - Remotion smoke test renders
 - DCF acceptance test (`pipeline.integration.test.ts` + `dcf:*` scripts)
 - Style matrix: one representative frame per style, 16:9 and 9:16
+
+## 16. Phase 12: produced quality
+
+- **Real fonts**: Inter (400–800), JetBrains Mono and Archivo Black are loaded
+  via `@remotion/google-fonts` for both the browser Player and worker renders;
+  the editorial style now uses Archivo Black. Fonts are fetched once at bundle
+  time and cached; offline renders fall back to system fonts.
+- **Scene transitions**: the style's `transitions` tokens are now used — the
+  incoming scene animates over `durationFrames` frames (crossfade through the
+  theme background, slide, scale, or draw-in wipe). Deterministic and
+  frame-driven.
+- **Music bed**: a deterministic ambient bed (three low sines, lowpassed,
+  tremolo'd) is generated procedurally with ffmpeg — no third-party audio —
+  mixed under narration with sidechain ducking (`projects.music_bed`).
+- **Brand mark**: a subtle brand watermark in the corner (`brandName` +
+  `brandMark` through the manifest).
+
+## 17. Phase 13: payments
+
+- Plans (Free / Pro $19 / Studio $49) and credit packs ($5 / $20 / $60) with a
+  public `/pricing` page and settings billing card.
+- `POST /api/billing/checkout`: with Stripe keys configured, creates a real
+  Checkout Session (price IDs from env); without keys, fulfills directly in
+  dev mode so the flow is testable end-to-end.
+- `POST /api/billing/webhook` verifies Stripe signatures and grants credits /
+  activates plans on `checkout.session.completed`.
+- Monthly plan credits and future payment-provider changes only touch the
+  grant path.

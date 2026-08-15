@@ -21,6 +21,8 @@ export interface RenderManifestInput {
   styleId?: string;
   styleVersion?: number;
   burnedCaptions?: boolean;
+  brandName?: string;
+  brandMark?: boolean;
   audioUrlFor?: (assetKey: string) => string | null;
 }
 
@@ -68,6 +70,8 @@ export function buildRenderManifest(input: RenderManifestInput): RenderManifest 
     theme,
     style: {styleId, styleVersion},
     burnedCaptions: input.burnedCaptions ?? true,
+    brandName: input.brandName ?? '',
+    brandMark: input.brandMark ?? true,
     scenes: renderScenes,
     audioTracks: renderScenes
       .filter((scene) => scene.narrationAudioKey)

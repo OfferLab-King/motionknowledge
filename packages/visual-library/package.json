@@ -8,7 +8,8 @@
     "./theme": "./src/theme.ts",
     "./style": "./src/style/registry.ts",
     "./showcase": "./src/style/showcase.tsx",
-    "./catalog": "./src/catalog.ts"
+    "./catalog": "./src/catalog.ts",
+    "./fonts": "./src/fonts.ts"
   },
   "scripts": {
     "lint": "echo 'no lint configured'",
@@ -17,14 +18,15 @@
   },
   "dependencies": {
     "@motionknowledge/schemas": "workspace:*",
+    "@remotion/google-fonts": "4.0.508",
     "react": "19.2.8",
     "remotion": "4.0.508",
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@types/node": "24.10.1",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "@types/node": "24.10.1",
     "react-dom": "19.2.8",
     "typescript": "5.9.3",
     "vitest": "4.1.10"

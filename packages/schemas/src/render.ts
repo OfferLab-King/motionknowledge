@@ -37,6 +37,8 @@ export const RenderManifestV1 = z.object({
   theme: ThemeTokenSchema,
   style: StyleIdentitySchema.default({styleId: 'signature', styleVersion: 1}),
   burnedCaptions: z.boolean().default(true),
+  brandName: z.string().default(''),
+  brandMark: z.boolean().default(true),
   scenes: z.array(RenderSceneV1).min(1),
   audioTracks: z.array(
     z.object({

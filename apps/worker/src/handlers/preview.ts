@@ -35,6 +35,8 @@ export async function handleGeneratePreview(
     styleId: project.styleId ?? 'signature',
     styleVersion: project.styleVersion ?? 1,
     burnedCaptions: project.burnedCaptions ?? true,
+    brandName: process.env.NEXT_PUBLIC_PRODUCT_NAME ?? 'MotionKnowledge',
+    brandMark: project.brandMark ?? true,
   });
   RenderManifestV1.parse(manifest);
   const manifestHash = stableHash(manifest);
@@ -101,7 +103,7 @@ export async function handleGeneratePreview(
   });
   const {attachNarration} = await import('../lib/narration');
   const finalPath = join(scratch, 'preview-narrated.mp4');
-  await attachNarration(deps, manifest, outputPath, finalPath);
+  await attachNarration(deps, manifest, outputPath, finalPath, {musicBed: project.musicBed ?? true});
   const bytes = new Uint8Array(await readFile(finalPath));
   await rm(scratch, {recursive: true, force: true});
   const narratedSha = await import('node:crypto').then(({createHash}) => createHash('sha256').update(Buffer.from(bytes)).digest('hex'));

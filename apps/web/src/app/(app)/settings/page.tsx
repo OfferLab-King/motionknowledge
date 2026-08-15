@@ -9,6 +9,9 @@ import {subscriptions, workspaceMemberships, workspaces} from '@motionknowledge/
 import {eq} from 'drizzle-orm';
 import {resolveWorkspaceId} from '../../../services/projects';
 import {WorkspaceMembers} from '../../../components/shell/WorkspaceMembers';
+import {CheckoutButton} from '../../../components/billing/CheckoutButton';
+import {PLANS, CREDIT_PACKS} from '../../../lib/billing';
+import Link from 'next/link';
 
 export default async function SettingsPage() {
   const user = await getSessionUser();
@@ -79,6 +82,21 @@ export default async function SettingsPage() {
               A final render costs 1 credit; LLM and TTS operations deduct their estimated cost. Free
               workspaces start with 5,000 credits.
             </p>
+            <div className="border-t border-[#2a4568] pt-3">
+              <div className="mb-2 flex flex-wrap gap-2">
+                {PLANS.filter((plan) => plan.priceUsd > 0).map((plan) => (
+                  <CheckoutButton key={plan.id} kind="plan" id={plan.id} label={`Upgrade to ${plan.name} — $${plan.priceUsd}/mo`} />
+                ))}
+              </div>
+              <div className="mb-2 flex flex-wrap gap-2">
+                {CREDIT_PACKS.map((pack) => (
+                  <CheckoutButton key={pack.id} kind="credits" id={pack.id} label={`+${pack.credits.toLocaleString()} credits — $${pack.priceUsd}`} />
+                ))}
+              </div>
+              <Link href="/pricing" className="text-xs text-[#59d5e0] hover:underline">
+                Compare plans →
+              </Link>
+            </div>
           </div>
         </Card>
         <Card>

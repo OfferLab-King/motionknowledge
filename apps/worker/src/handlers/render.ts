@@ -126,7 +126,7 @@ export async function handleRenderFinal(
   });
   const {attachNarration} = await import('../lib/narration');
   const finalVideoPath = join(scratch, 'final-narrated.mp4');
-  await attachNarration(deps, manifest, videoPath, finalVideoPath);
+  await attachNarration(deps, manifest, videoPath, finalVideoPath, {musicBed: project.musicBed ?? true});
   const chapteredVideoPath = join(scratch, 'final-chaptered.mp4');
   const chapterTitleById = new Map((script?.chapters ?? []).map((chapter) => [chapter.id, chapter.title]));
   const {injectChapterMetadata} = await import('@motionknowledge/audio');

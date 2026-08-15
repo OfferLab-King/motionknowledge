@@ -30,6 +30,12 @@ export default function LandingPage() {
               Start creating
             </Link>
             <Link
+              href="/pricing"
+              className="rounded-lg border border-[#2a4568] bg-[#10213a] px-6 py-3 font-semibold text-[#f8fafc] hover:bg-[#1a3050]"
+            >
+              Pricing
+            </Link>
+            <Link
               href="/login"
               className="rounded-lg border border-[#2a4568] bg-[#10213a] px-6 py-3 font-semibold text-[#f8fafc] hover:bg-[#1a3050]"
             >

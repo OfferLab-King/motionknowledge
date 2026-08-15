@@ -5,7 +5,7 @@ import type {RenderManifest} from '@motionknowledge/schemas';
 import {attachNarrationToVideo} from '@motionknowledge/audio';
 import type {WorkerDeps} from '../deps';
 
-export async function attachNarration(deps: WorkerDeps, manifest: RenderManifest, videoPath: string, outputPath: string): Promise<{narrationTracks: number}> {
+export async function attachNarration(deps: WorkerDeps, manifest: RenderManifest, videoPath: string, outputPath: string, options: {musicBed?: boolean} = {}): Promise<{narrationTracks: number}> {
   const scratch = await mkdtemp(join(tmpdir(), 'mk-narr-'));
   const tracks: Array<{path: string; offsetMs: number}> = [];
   try {
@@ -17,7 +17,18 @@ export async function attachNarration(deps: WorkerDeps, manifest: RenderManifest
       await writeFile(path, Buffer.from(bytes));
       tracks.push({path, offsetMs: scene.narrationStartMs + Math.round((scene.startFrame / manifest.fps) * 1000)});
     }
-    await attachNarrationToVideo({videoPath, narrationTracks: tracks, outputPath});
+    const musicTrackPath = options.musicBed ? join(scratch, 'music.m4a') : undefined;
+    if (musicTrackPath) {
+      const {generateMusicBed} = await import('@motionknowledge/audio');
+      await generateMusicBed({durationSeconds: manifest.totalDurationInFrames / manifest.fps, outputPath: musicTrackPath});
+    }
+    await attachNarrationToVideo({
+      videoPath,
+      narrationTracks: tracks,
+      outputPath,
+      musicTrackPath,
+      musicRelativeDb: -14,
+    });
   } finally {
     await rm(scratch, {recursive: true, force: true});
   }

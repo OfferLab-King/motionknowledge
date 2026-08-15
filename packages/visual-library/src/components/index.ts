@@ -5,3 +5,5 @@ export * from './technical';
 export * from './relationships';
 export * from './assessment';
 export * from './captions';
+export * from './transitions';
+export * from './brand';

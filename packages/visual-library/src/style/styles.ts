@@ -276,9 +276,9 @@ export const editorialStyle: VisualStylePack = {
       chartPalette: ['#FF4D2E', '#1B1B1F', '#FFC531', '#0F9D58', '#2D6CDF', '#C8102E'],
     },
     fonts: {
-      heading: `'Arial Black', 'Avenir Next Condensed', system-ui, sans-serif`,
-      body: `'Helvetica Neue', 'Inter', system-ui, sans-serif`,
-      mono: `'SF Mono', Menlo, monospace`,
+      heading: `'Archivo Black', 'Arial Black', system-ui, sans-serif`,
+      body: `'Inter', 'Helvetica Neue', system-ui, sans-serif`,
+      mono: `'JetBrains Mono', 'SF Mono', Menlo, monospace`,
     },
     typography: {display: 110, heading: 72, subheading: 44, body: 32, caption: 22},
     background: {treatment: 'flat', gradient: 'none', texture: 'none'},

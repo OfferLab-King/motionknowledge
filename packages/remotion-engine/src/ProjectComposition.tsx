@@ -1,4 +1,5 @@
-import {getVisualDefinition, resolveSceneTheme, resolveTheme, BurnedCaptions, type Theme} from '@motionknowledge/visual-library';
+import {getVisualDefinition, resolveSceneTheme, resolveTheme, BurnedCaptions, SceneTransition, BrandWatermark, type Theme} from '@motionknowledge/visual-library';
+import {loadProjectFonts} from '@motionknowledge/visual-library/fonts';
 import {visualRouter} from '@motionknowledge/visual-router';
 import {AbsoluteFill, Audio, Sequence} from 'remotion';
 import type {RenderManifest, RenderScene} from '@motionknowledge/schemas';
@@ -109,11 +110,13 @@ export function SceneRenderer(props: {scene: RenderScene; index: number; manifes
     const parsed = definition.propsSchema.safeParse(componentData);
     if (parsed.success) {
       return (
-        <Component
-          data={parsed.data}
-          theme={resolved.theme}
-          durationInFrames={scene.durationInFrames}
-        />
+        <SceneTransition theme={resolved.theme}>
+          <Component
+            data={parsed.data}
+            theme={resolved.theme}
+            durationInFrames={scene.durationInFrames}
+          />
+        </SceneTransition>
       );
     }
   }
@@ -126,6 +129,8 @@ export function SceneRenderer(props: {scene: RenderScene; index: number; manifes
     </AbsoluteFill>
   );
 }
+
+loadProjectFonts();
 
 export function ProjectComposition(props: ProjectCompositionProps) {
   const {manifest} = props;
@@ -154,6 +159,9 @@ export function ProjectComposition(props: ProjectCompositionProps) {
           </SceneWithAudio>
         </Sequence>
       ))}
+      {manifest.brandName && manifest.brandMark ? (
+        <BrandWatermark theme={manifest.theme as Theme} brandName={manifest.brandName} />
+      ) : null}
     </AbsoluteFill>
   );
 }

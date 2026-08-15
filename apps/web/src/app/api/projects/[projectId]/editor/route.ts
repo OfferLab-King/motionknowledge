@@ -49,6 +49,8 @@ export async function GET(request: Request, {params}: {params: Promise<{projectI
         styleId: project.styleId ?? 'signature',
         styleVersion: project.styleVersion ?? 1,
         burnedCaptions: project.burnedCaptions ?? true,
+        brandName: process.env.NEXT_PUBLIC_PRODUCT_NAME ?? 'MotionKnowledge',
+        brandMark: project.brandMark ?? true,
         audioUrlFor: (key) => `/api/objects/${key}`,
       })
     : null;
