@@ -16,7 +16,6 @@ export default async function NewProjectPage() {
         narrate, and preview the project before you render it.
       </p>
       <NewProjectForm
-        voices={voices.map((voice) => ({id: voice.id, label: voice.label}))}
         formats={formats.map((format) => ({id: format.id, name: format.name, description: format.description}))}
         languages={SUPPORTED_LANGUAGES.map((lang) => ({code: lang.code, name: lang.name}))}
       />

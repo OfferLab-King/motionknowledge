@@ -6,9 +6,7 @@ import {UsageLedgerImpl, type UsageLedger} from '@motionknowledge/usage';
 import {ContentPipeline} from '@motionknowledge/content-engine';
 import {ResearchService} from '@motionknowledge/research';
 import {TTSService} from '@motionknowledge/tts';
-import {MockTTSProvider} from '@motionknowledge/tts';
-import {GoogleCloudTTSProvider} from '@motionknowledge/tts';
-import {ElevenLabsProvider} from '@motionknowledge/tts';
+import {createMultiVoiceTTSFromEnv} from '@motionknowledge/tts';
 import {MockProvider, OpenAIProvider, OpenAICompatibleProvider, type LLMProvider, type TTSProvider, type StorageProvider} from '@motionknowledge/providers';
 import {createLogger, type StructuredLogger} from '@motionknowledge/observability';
 import type {JobQueue} from '@motionknowledge/jobs';
@@ -83,22 +81,7 @@ export function buildWorkerDeps(env: NodeJS.ProcessEnv): WorkerDeps {
     llm = new MockProvider();
   }
 
-  let tts: TTSProvider;
-  if (config.ttsProvider === 'google' && env.GOOGLE_TTS_CREDENTIALS_JSON) {
-    tts = new GoogleCloudTTSProvider({
-      credentialsJson: env.GOOGLE_TTS_CREDENTIALS_JSON,
-      voice: config.ttsVoice,
-      languageCode: 'en-US',
-    });
-  } else if (config.ttsProvider === 'elevenlabs' && env.ELEVENLABS_API_KEY) {
-    tts = new ElevenLabsProvider({
-      apiKey: env.ELEVENLABS_API_KEY,
-      voiceId: env.ELEVENLABS_VOICE_ID ?? '21m00Tcm4TlvDq8ikWAM',
-      model: env.ELEVENLABS_MODEL ?? 'eleven_multilingual_v2',
-    });
-  } else {
-    tts = new MockTTSProvider();
-  }
+  const tts = createMultiVoiceTTSFromEnv(env);
 
   const researchService = new ResearchService({llm, usage});
   const contentPipeline = new ContentPipeline({llm, usage});

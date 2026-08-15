@@ -5,9 +5,9 @@ import {Card, Field, Select, TextInput, Button} from '@motionknowledge/ui';
 import {TemplateGallery} from './TemplateGallery';
 import {StyleGallery} from './StyleGallery';
 import {createProjectAction} from '../../services/projects';
+import {VoiceSelect} from './VoiceSelect';
 
 export function NewProjectForm(props: {
-  voices: Array<{id: string; label: string}>;
   formats: Array<{id: string; name: string; description: string}>;
   languages: Array<{code: string; name: string}>;
 }) {
@@ -18,6 +18,7 @@ export function NewProjectForm(props: {
   });
   const [styleId, setStyleId] = useState('signature');
   const [sourceType, setSourceType] = useState('topic');
+  const [language, setLanguage] = useState('en');
 
   return (
     <form action={createProjectAction} className="space-y-8">
@@ -111,7 +112,12 @@ export function NewProjectForm(props: {
               </Select>
             </Field>
             <Field label="Language">
-              <Select name="language" defaultValue="en" aria-label="Language">
+              <Select
+                name="language"
+                defaultValue="en"
+                aria-label="Language"
+                onChange={(event) => setLanguage(event.target.value)}
+              >
                 {props.languages.map((lang) => (
                   <option key={lang.code} value={lang.code}>
                     {lang.name}
@@ -132,14 +138,8 @@ export function NewProjectForm(props: {
                 <option value="9:16">9:16</option>
               </Select>
             </Field>
-            <Field label="Narration voice" hint="Free on-device voices; neural voices appear when Google/ElevenLabs are configured.">
-              <Select name="voice" defaultValue="Samantha" aria-label="Narration voice">
-                {props.voices.map((voice) => (
-                  <option key={voice.id} value={voice.id}>
-                    {voice.label}
-                  </option>
-                ))}
-              </Select>
+            <Field label="Narration voice" hint="Neural and premium voices appear when provider keys are configured.">
+              <VoiceSelect language={language} />
             </Field>
           </div>
           <Button type="submit" className="w-full">

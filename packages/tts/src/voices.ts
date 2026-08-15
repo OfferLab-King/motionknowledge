@@ -91,3 +91,49 @@ export const VOICE_NAME_PATTERN = /^[A-Za-z0-9 ()'-]+$/;
 export function isSafeVoiceName(name: string): boolean {
   return VOICE_NAME_PATTERN.test(name) && name.length <= 80;
 }
+
+
+/** Quality tier labels for the UI. */
+export function qualityLabel(quality: VoiceOption['quality']): string {
+  switch (quality) {
+    case 'premium': return 'Premium';
+    case 'neural': return 'Neural';
+    default: return 'Standard';
+  }
+}
+
+/** Recommended Google Neural2 voice per language code. */
+export const LANGUAGE_DEFAULT_VOICES: Readonly<Record<string, string>> = {
+  en: 'en-US-Neural2-J',
+  es: 'es-ES-Neural2-F',
+  fr: 'fr-FR-Neural2-C',
+  de: 'de-DE-Neural2-D',
+  pt: 'pt-BR-Neural2-A',
+  it: 'it-IT-Neural2-C',
+  nl: 'nl-NL-Neural2-A',
+  ru: 'ru-RU-Neural2-F',
+  pl: 'pl-PL-Neural2-A',
+  sv: 'sv-SE-Neural2-A',
+  da: 'da-DK-Neural2-D',
+  no: 'nb-NO-Neural2-A',
+  fi: 'fi-FI-Neural2-A',
+  el: 'el-GR-Neural2-A',
+  tr: 'tr-TR-Neural2-C',
+  ja: 'ja-JP-Neural2-C',
+  ko: 'ko-KR-Neural2-C',
+  zh: 'cmn-CN-Neural2-C',
+  hi: 'hi-IN-Neural2-A',
+  cs: 'cs-CZ-Neural2-A',
+  ro: 'ro-RO-Neural2-A',
+  hu: 'hu-HU-Neural2-A',
+  bg: 'bg-BG-Neural2-A',
+  uk: 'uk-UA-Neural2-A',
+  vi: 'vi-VN-Neural2-A',
+  th: 'th-TH-Neural2-A',
+  id: 'id-ID-Neural2-A',
+};
+
+/** Recommended default voice for a language (Google Neural2 when possible). */
+export function defaultVoiceForLanguage(language: string): string {
+  return LANGUAGE_DEFAULT_VOICES[language] ?? 'en-US-Neural2-J';
+}

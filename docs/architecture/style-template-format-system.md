@@ -336,3 +336,21 @@ index; use the `./style` and `./catalog` subpaths instead.
   activates plans on `checkout.session.completed`.
 - Monthly plan credits and future payment-provider changes only touch the
   grant path.
+
+## 18. TTS voice quality
+
+- **Provider-aware voice routing**: `MultiVoiceTTSService` routes each
+  synthesis by the chosen voice — Google voice ids (e.g. `en-US-Neural2-J`)
+  to Google Cloud TTS, ElevenLabs ids to ElevenLabs, macOS names to the
+  on-device synthesizer. Providers are cached per voice; unknown voices fall
+  back to on-device synthesis so narration never silently fails.
+- **Voice selection UX**: the creation form lists all configured providers'
+  voices (grouped, with quality badges) and a **Preview** button that
+  synthesizes a sample sentence through the exact provider the video will use.
+- **Language-matched defaults**: recommended Neural2 voices per language
+  (es-ES-Neural2-F, fr-FR-Neural2-C, …), auto-selected when the language
+  changes.
+- Voice quality is gated by the configured providers: ElevenLabs (premium) >
+  Google Neural2/Wavenet (neural) > macOS on-device (free).
+
+## 19. Migration risks
