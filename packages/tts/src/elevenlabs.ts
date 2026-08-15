@@ -26,14 +26,39 @@ export class ElevenLabsProvider implements TTSProvider {
     const audioBytes = new Uint8Array(Buffer.from(timestamps.audio_base64, 'base64'));
     const alignment = timestamps.alignment ?? timestamps.normalized_alignment;
     const characters = alignment?.characters ?? [];
-    const wordTimings = characters
-      .map((char, index) => ({
-        word: char,
-        startMs: Math.round((alignment?.character_start_times_seconds?.[index] ?? 0) * 1000),
-        endMs: Math.round((alignment?.character_end_times_seconds?.[index] ?? 0) * 1000) + 1,
-        confidence: 0.98,
-      }))
-      .filter((entry) => entry.word.trim().length > 0);
+    const starts = alignment?.character_start_times_seconds ?? [];
+    const ends = alignment?.character_end_times_seconds ?? [];
+    // Group characters into words (ElevenLabs reports per-character
+    // alignment); word timing = first/last character of the word.
+    const words: Array<{word: string; startMs: number; endMs: number}> = [];
+    let current = '';
+    let wordStart: number | null = null;
+    let wordEnd = 0;
+    for (let index = 0; index < characters.length; index++) {
+      const char = characters[index] ?? '';
+      const startMs = (starts?.[index] ?? 0) * 1000;
+      const endMs = (ends?.[index] ?? 0) * 1000;
+      if (char.trim().length === 0) {
+        if (current.length > 0) {
+          words.push({word: current, startMs: wordStart ?? 0, endMs: Math.max(wordEnd, (wordStart ?? 0) + 1)});
+          current = '';
+          wordStart = null;
+        }
+        continue;
+      }
+      if (!current) wordStart = startMs;
+      current += char;
+      wordEnd = endMs;
+    }
+    if (current.length > 0) {
+      words.push({word: current, startMs: wordStart ?? 0, endMs: Math.max(wordEnd, (wordStart ?? 0) + 1)});
+    }
+    const wordTimings = words.map((word) => ({
+      word: word.word,
+      startMs: Math.round(word.startMs),
+      endMs: Math.round(word.endMs),
+      confidence: 0.98,
+    }));
     const normalized = normalizeTimedWords(wordTimings);
     const durationMs = normalized.at(-1)?.endMs ?? 0;
     return {

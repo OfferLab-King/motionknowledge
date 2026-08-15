@@ -77,13 +77,17 @@ export const GOOGLE_WAVENET_VOICES: VoiceOption[] = ['A', 'B', 'C', 'D', 'E', 'F
   }),
 );
 
-/** A few well-known ElevenLabs default voices (require ELEVENLABS_API_KEY). */
+/** Fallback ElevenLabs voices. Free accounts can use the "premade" voices;
+ * library voices (Rachel, Sarah, …) require a paid plan. The live account
+ * voice list is fetched by /api/voices when a key is configured. */
 export const ELEVENLABS_VOICES: VoiceOption[] = [
-  {id: '21m00Tcm4TlvDq8ikWAM', label: 'Rachel', provider: 'elevenlabs', quality: 'premium'},
-  {id: 'EXAVITQu4vr4xnSDxMaL', label: 'Sarah', provider: 'elevenlabs', quality: 'premium'},
-  {id: 'ErXwobaYiN019PkySvjV', label: 'Antoni', provider: 'elevenlabs', quality: 'premium'},
-  {id: 'onwK4e9ZLuTAKqWW03F9', label: 'Adam', provider: 'elevenlabs', quality: 'premium'},
-  {id: 'pFZP5JQG7iQjIQuC4Bku', label: 'Lily', provider: 'elevenlabs', quality: 'premium'},
+  {id: 'XrExE9yKIg1WjnnlVkGX', label: 'Matilda — Knowledgable, Professional', provider: 'elevenlabs', quality: 'premium'},
+  {id: 'Xb7hH8MSUJpSbSDYk0k2', label: 'Alice — Clear, Engaging Educator', provider: 'elevenlabs', quality: 'premium'},
+  {id: 'bIHbv24MWmeRgasZH58o', label: 'Will — Relaxed Optimist', provider: 'elevenlabs', quality: 'premium'},
+  {id: 'CwhRBWXzGAHq8TQ4Fs17', label: 'Roger — Laid-Back, Casual', provider: 'elevenlabs', quality: 'premium'},
+  {id: 'jBpfuIE2acCO8z3wKNLl', label: 'Gigi — Adorable, Friendly, Playful', provider: 'elevenlabs', quality: 'premium'},
+  {id: '21m00Tcm4TlvDq8ikWAM', label: 'Rachel (paid plan required)', provider: 'elevenlabs', quality: 'premium'},
+  {id: 'EXAVITQu4vr4xnSDxMaL', label: 'Sarah (paid plan required)', provider: 'elevenlabs', quality: 'premium'},
 ];
 
 export const VOICE_NAME_PATTERN = /^[A-Za-z0-9 ()'-]+$/;

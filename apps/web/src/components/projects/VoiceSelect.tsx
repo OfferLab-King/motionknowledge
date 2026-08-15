@@ -30,10 +30,16 @@ export function VoiceSelect(props: {language: string; defaultValue?: string}) {
         if (!data) return;
         setVoices(data.voices);
         setProviders(data.providers);
-        // Suggest the language-matched neural voice when available.
-        const suggested = `en-US-Neural2-${'J'}`.replace(/en-US-Neural2-J/, languageDefault(props.language));
-        const match = data.voices.find((option) => option.id === suggested);
-        if (match && !props.defaultValue) setVoice(match.id);
+        // Suggest the language-matched voice when the matching provider is
+        // configured; otherwise prefer the configured ElevenLabs default.
+        const languageVoice = languageDefault(props.language);
+        const languageMatch = data.voices.find((option) => option.id === languageVoice);
+        if (languageMatch && data.providers.google?.configured) {
+          setVoice(languageMatch.id);
+        } else if (data.providers.elevenlabs?.configured) {
+          const elevenLabsDefault = data.voices.find((option) => option.provider === 'elevenlabs');
+          if (elevenLabsDefault && !props.defaultValue) setVoice(elevenLabsDefault.id);
+        }
       })
       .catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -352,5 +352,12 @@ index; use the `./style` and `./catalog` subpaths instead.
   changes.
 - Voice quality is gated by the configured providers: ElevenLabs (premium) >
   Google Neural2/Wavenet (neural) > macOS on-device (free).
+- ElevenLabs notes: free accounts can only use "premade" voices over the API
+  (library voices like Rachel require a paid plan). `/api/voices` fetches the
+  account's live voice list when a key is configured; the default voice is a
+  free-tier-friendly premade voice. Word timings are grouped from ElevenLabs'
+  per-character alignment.
+- Verified end-to-end against a live ElevenLabs account: Matilda, Alice and
+  Will synthesize with correct word timings in ~1.2 s.
 
 ## 19. Migration risks
